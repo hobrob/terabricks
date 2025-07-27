@@ -1,0 +1,23 @@
+# Exclude entire docs directory
+temporals/docs/
+
+# Python artifacts
+temporals/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment and config files
+.env
+*.env
+
+# Editor/IDE junk
+*.swp
+*.swo
+*.bak
+.vscode/
+.idea/
+
+# OS-specific cruft
+.DS_Store
+Thumbs.db
