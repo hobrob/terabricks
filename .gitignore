@@ -2,7 +2,7 @@
 temporals/docs/
 
 # Python artifacts
-temporals/__pycache__/
+temporals/test/.pytest_cache/
 *.pyc
 *.pyo
 *.pyd
