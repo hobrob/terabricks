@@ -1,0 +1,30 @@
+name: Simple UDF CI
+
+on: [push, pull_request]
+
+jobs:
+  test-and-register:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install test dependencies
+      run: pip install -r temporals/test/requirements.txt
+
+    - name: Run test suite
+      run: |
+        echo "Running test harness..."
+        pytest temporals/test/ --maxfail=1 --disable-warnings --tb=short
+
+    - name: Register UDFs (on success)
+      if: success()
+      run: |
+        echo "All tests passed. Proceeding with UDF registration..."
+        python temporals/register_udfs.py
