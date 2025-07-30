@@ -39,19 +39,11 @@ jobs:
     - name: Verify connectivity
       run: databricks workspace list /
 
-    - name: Render .dbsqlclirc file
-      run: |
-        cat <<EOF > temporals/core/.dbsqlclirc
-        [connections.default]
-        hostname = "${DATABRICKS_HOST}"
-        http_path = "${WAREHOUSE_HTTP_PATH}"
-        access_token = "${DATABRICKS_TOKEN}"
-
-        [parameters]
-        catalog_name = "${CATALOG_NAME}"
-        schema_name = "${SCHEMA_NAME}"
-        EOF
+    - name: Where am I
+      run: pwd
 
     - name: Run SQL
-      run: dbsqlcli --help #--config temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql
-      working-directory: temporals/core
+      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql
+        --hostname $DATABRICKS_HOST \
+        --http-path $WAREHOUSE_HTTP_PATH \
+        --access-token $DATABRICKS_TOKEN
