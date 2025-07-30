@@ -33,6 +33,9 @@ jobs:
         echo "Running test harness..."
         pytest temporals/test/ --maxfail=1 --disable-warnings --tb=short
 
+    - name: Install Databricks CLI
+      uses: databricks/setup-cli@main
+
     - name: Verify connectivity
       run: databricks workspace list
 
