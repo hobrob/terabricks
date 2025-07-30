@@ -2,6 +2,13 @@ name: Simple UDF CI
 
 on: [push, pull_request]
 
+env:
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+  DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
+  SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
+  WAREHOUSE_ID: ${{ secrets.WAREHOUSE_ID }}
+
 jobs:
   test-and-register:
     runs-on: ubuntu-latest
@@ -26,8 +33,13 @@ jobs:
         echo "Running test harness..."
         pytest temporals/test/ --maxfail=1 --disable-warnings --tb=short
 
-    - name: Register UDFs (on success)
+    - name: Verify connectivity
+      run: databricks workspace list
+
+    - name: Register SQL UDFs
       if: success()
       run: |
-        echo "All tests passed. Proceeding with UDF registration..."
-        python temporals/register_udfs.py
+        databricks sql query \
+          --warehouse-id $WAREHOUSE_ID \
+          --query-file temporals/core/register_udfs.sql \
+          --parameters catalog_name=$CATALOG_NAME schema_name=$SCHEMA_NAME
