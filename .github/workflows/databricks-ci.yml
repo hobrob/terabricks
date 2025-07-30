@@ -37,7 +37,7 @@ jobs:
       uses: databricks/setup-cli@main
 
     - name: Verify connectivity
-      run: databricks workspace list
+      run: databricks workspace list /
 
     - name: Register SQL UDFs
       if: success()
