@@ -5,9 +5,9 @@ on: [push, pull_request]
 env:
   DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
   DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+  WAREHOUSE_HTTP_PATH: ${{ secrets.$WAREHOUSE_HTTP_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
-  WAREHOUSE_ID: ${{ secrets.WAREHOUSE_ID }}
 
 jobs:
   test-and-register:
@@ -39,10 +39,9 @@ jobs:
     - name: Verify connectivity
       run: databricks workspace list /
 
-    - name: Register SQL UDFs
-      if: success()
-      run: |
-        databricks sql query \
-          --warehouse-id $WAREHOUSE_ID \
-          --query-file temporals/core/register_udfs.sql \
-          --parameters catalog_name=$CATALOG_NAME schema_name=$SCHEMA_NAME
+    - name: Run SQL
+      run: dbsqlcli -e temporals/core/register_udfs.sql \
+        --hostname $DATABRICKS_HOST \
+        --http-path $WAREHOUSE_HTTP_PATH \
+        --access-token $DATABRICKS_TOKEN \
+        --parameters catalog_name=$CATALOG_NAME schema_name=$SCHEMA_NAME
