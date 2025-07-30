@@ -5,7 +5,7 @@ on: [push, pull_request]
 env:
   DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
   DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-  WAREHOUSE_HTTP_PATH: ${{ secrets.$WAREHOUSE_HTTP_PATH }}
+  WAREHOUSE_HTTP_PATH: ${{ secrets.WAREHOUSE_HTTP_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
 
