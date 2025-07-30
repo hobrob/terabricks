@@ -53,5 +53,5 @@ jobs:
         EOF
 
     - name: Run SQL
-      run: dbsqlcli --config temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql
+      run: dbsqlcli --help #--config temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql
       working-directory: temporals/core
