@@ -44,7 +44,7 @@ jobs:
 
     - name: Run SQL
       continue-on-error: true
-      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN
+      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname "dbc-e9acbf37-0538.cloud.databricks.com" --http-path "/sql/1.0/warehouses/610e951eaec62fa1" --access-token "dapi2065392b4ce1ddd00d8c0026f926a297"
 
     - name: Check logs
       run: cat ~/.dbsqlcli/app.log
