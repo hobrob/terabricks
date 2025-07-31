@@ -17,7 +17,7 @@ curl -s -X POST "https://${DATABRICKS_HOST}/api/2.0/sql/statements/" \
   -H "Authorization: Bearer ${DATABRICKS_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
-    "statement": "'"$SQL_RENDERED"'",
-    "warehouse_id": "'"$WAREHOUSE_ID"'",
+    "statement": "'$SQL_RENDERED'",
+    "warehouse_id": "'$WAREHOUSE_ID'",
     "wait_timeout": "30s"
   }'
