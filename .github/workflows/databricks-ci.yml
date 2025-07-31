@@ -45,7 +45,7 @@ jobs:
 
     - name: Run SQL
       continue-on-error: true
-      run: bash .github/workflow/databricks-ci.sh temporals/core/register_udfs.sql
+      run: bash .github/workflows/databricks-ci.sh temporals/core/register_udfs.sql
       #      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN --catalog_name="workspace"
 
     - name: Check logs
