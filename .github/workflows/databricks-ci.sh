@@ -12,12 +12,16 @@ SQL_RENDERED=$(echo "$SQL_TEMPLATE" \
   | sed "s/:catalog_name/$CATALOG_NAME/g" \
   | sed "s/:schema_name/$SCHEMA_NAME/g")
 
+# Construct payload using jq (safe JSON encoding)
+JSON_PAYLOAD=$(jq -n --arg statement "$SQL_RENDERED" --arg wh_id "$WAREHOUSE_ID" \
+  '{
+    statement: $statement,
+    warehouse_id: $wh_id,
+    wait_timeout: "30s"
+  }')
+
 # Run SQL via REST API
 curl -s -X POST "https://${DATABRICKS_HOST}/api/2.0/sql/statements/" \
   -H "Authorization: Bearer ${DATABRICKS_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d '{
-    "statement": "'$SQL_RENDERED'",
-    "warehouse_id": "'$WAREHOUSE_ID'",
-    "wait_timeout": "30s"
-  }'
+  -d "$JSON_PAYLOAD"
