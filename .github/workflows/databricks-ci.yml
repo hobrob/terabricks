@@ -46,5 +46,5 @@ jobs:
       continue-on-error: true
       run: dbsqlcli -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN
 
-    - name: Check logs
-      run: cat ~/.dbsqlcli/app.log
+    - name: Check config
+      run: cat  ~/.dbsqlcli/dbsqlclirc
