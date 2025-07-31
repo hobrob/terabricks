@@ -43,5 +43,6 @@ jobs:
       run: pwd
 
     - name: Run SQL
-      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN
+      run: |
+        dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN
         cat ~/.dbsqlcli/app.log
