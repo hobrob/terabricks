@@ -54,7 +54,8 @@ jobs:
               "warehouse_id": "610e951eaec62fa1",
               "base_parameters": {
                 "env": "ci",
-                "catalog_name": "workspace"
+                "catalog_name": "workspace",
+                "schema_name": "funlib"
               }
             }
           }]
