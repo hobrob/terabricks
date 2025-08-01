@@ -7,7 +7,6 @@ env:
   DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
   WAREHOUSE_ID: ${{ secrets.WAREHOUSE_ID }}
   WAREHOUSE_HTTP_PATH: ${{ secrets.WAREHOUSE_HTTP_PATH }}
-  WORKSPACE_REPO_PATH: ${{ secrets.WORKSPACE_REPO_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
 
@@ -46,23 +45,20 @@ jobs:
 
     - name: Submit Job Inline
       run: |
-        databricks jobs submit --json "$(cat <<EOF
-        {
+        databricks jobs submit --json '{
           "run_name": "CI Notebook Run",
           "tasks": [{
             "task_key": "Launch_Notebook",
             "notebook_task": {
-              "notebook_path": "${WORKSPACE_REPO_PATH}/terabricks/temporals/core/register_udfs",
-              "warehouse_id": ${WAREHOUSE_ID},
+              "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
+              "warehouse_id": "610e951eaec62fa1",
               "base_parameters": {
                 "env": "ci",
                 "catalog_name": "workspace"
               }
             }
           }]
-        }
-        EOF)"
-
+        }'
 
     #- name: Run SQL
     #  continue-on-error: true
