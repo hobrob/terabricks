@@ -43,6 +43,23 @@ jobs:
     - name: Where am I
       run: pwd
 
+    - name: Submit Job Inline
+      run: |
+        databricks jobs submit-run --json '{
+          "run_name": "CI Notebook Run",
+          "new_cluster": {
+            "spark_version": "13.3.x-scala2.12",
+            "node_type_id": "Standard_DS3_v2",
+            "num_workers": 2
+          },
+          "notebook_task": {
+            "notebook_path": "temporals/core/register_udfs.py",
+            "base_parameters": {
+              "env": "ci"
+            }
+          }
+        }'
+
     #- name: Run SQL
     #  continue-on-error: true
     #  run: bash .github/workflows/databricks-ci.sh temporals/core/register_udfs.sql
