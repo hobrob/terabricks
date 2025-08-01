@@ -48,6 +48,7 @@ jobs:
         databricks jobs submit --json '{
           "run_name": "CI Notebook Run",
           "tasks": [{
+            "task_key": "Launch deployment notebook",
             "new_cluster": {
               "spark_version": "13.3.x-scala2.12",
               "node_type_id": "Standard_DS3_v2"
