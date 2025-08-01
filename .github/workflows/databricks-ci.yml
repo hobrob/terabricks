@@ -49,12 +49,9 @@ jobs:
           "run_name": "CI Notebook Run",
           "tasks": [{
             "task_key": "Launch_Notebook",
-            "new_cluster": {
-              "spark_version": "13.3.x-scala2.12",
-              "node_type_id": "Standard_DS3_v2"
-            },
             "notebook_task": {
-              "notebook_path": "temporals/core/register_udfs.py",
+              "notebook_path": "temporals/core/register_udfs.sql",
+              "warehouse_id": "610e951eaec62fa1",
               "base_parameters": {
                 "env": "ci"
               }
