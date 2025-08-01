@@ -53,7 +53,8 @@ jobs:
               "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
               "warehouse_id": "610e951eaec62fa1",
               "base_parameters": {
-                "env": "ci"
+                "env": "ci",
+                "catalog_name": "workspace"
               }
             }
           }]
