@@ -38,7 +38,7 @@ jobs:
       uses: databricks/setup-cli@main
 
     - name: Verify connectivity
-      run: databricks workspace list /Users/robert.price@rpdw.co.uk/terabricks/temporals/core
+      run: databricks workspace list "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core"
 
     - name: Where am I
       run: pwd
