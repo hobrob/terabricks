@@ -50,7 +50,7 @@ jobs:
           "tasks": [{
             "task_key": "Launch_Notebook",
             "notebook_task": {
-              "notebook_path": "/Repos/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
+              "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
               "warehouse_id": "610e951eaec62fa1",
               "base_parameters": {
                 "env": "ci"
