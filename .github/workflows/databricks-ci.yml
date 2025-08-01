@@ -47,17 +47,18 @@ jobs:
       run: |
         databricks jobs submit --json '{
           "run_name": "CI Notebook Run",
-          "new_cluster": {
-            "spark_version": "13.3.x-scala2.12",
-            "node_type_id": "Standard_DS3_v2",
-            "num_workers": 2
-          },
-          "notebook_task": {
-            "notebook_path": "temporals/core/register_udfs.py",
-            "base_parameters": {
-              "env": "ci"
+          "tasks": [{
+            "new_cluster": {
+              "spark_version": "13.3.x-scala2.12",
+              "node_type_id": "Standard_DS3_v2"
+            },
+            "notebook_task": {
+              "notebook_path": "temporals/core/register_udfs.py",
+              "base_parameters": {
+                "env": "ci"
+              }
             }
-          }
+          }]
         }'
 
     #- name: Run SQL
