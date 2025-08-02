@@ -1,5 +1,6 @@
 # Exclude entire docs directory
 temporals/docs/
+temporals/sbox/
 
 # Python artifacts
 .pytest_cache/
