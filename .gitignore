@@ -1,9 +1,11 @@
 # Exclude entire docs directory
 temporals/docs/
 temporals/sbox/
+temporals/dist/
 
 # Python artifacts
 .pytest_cache/
+*.egg_info
 *.pyc
 *.pyo
 *.pyd
