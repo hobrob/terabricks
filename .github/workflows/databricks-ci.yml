@@ -57,7 +57,10 @@ jobs:
       run: ls -la temporals/dist
 
     - name: What is remote
-      run: databricks fs ls /Volumes/workspace/funlib/pypublic/
+      run: databricks fs ls /Volumes
+
+    - name: Help
+      run: databricks fs help
 
     - name: Deploy python wheel
       run: databricks fs cp "temporals/dist/terabricks_temporals-0.0.1-py3-none-any.whl" "/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"
