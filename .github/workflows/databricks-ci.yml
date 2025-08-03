@@ -54,7 +54,7 @@ jobs:
       run: pwd
 
     - name: What is here
-      run: ls -la
+      run: ls -la temporals
 
     - name: Deploy python wheel
       run: databricks fs cp "dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
