@@ -51,7 +51,7 @@ jobs:
       working-directory: temporals
 
     - name: Help
-      run: databricks volumes help
+      run: databricks volumes --help
 
     - name: Where am I
       run: pwd
