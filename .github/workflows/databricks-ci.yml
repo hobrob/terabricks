@@ -51,7 +51,7 @@ jobs:
       working-directory: temporals
 
     - name: Inspect wheel contents
-      run: unzip -l dist/terabricks_temporals-0.0.1-py3-none-any.whl | grep validators
+      run: unzip -l "temporals/dist/terabricks_temporals-0.0.1-py3-none-any.whl" | grep validators
 
 #    - name: Help
 #      run: databricks volumes --help
