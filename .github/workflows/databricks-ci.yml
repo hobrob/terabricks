@@ -11,8 +11,7 @@ env:
   WORKSPACE_VOLUME_PATH: ${{ secrets.WORKSPACE_VOLUME_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
-  WHEEL_VERSION: "0.0.1"
-  WHEEL_NAME: "terabricks_temporals-${{ env.WHEEL_VERSION }}-py3-none-any.whl"
+  WHEEL_NAME: "terabricks_temporals-0.0.1-py3-none-any.whl"
 
 jobs:
   test-and-register:

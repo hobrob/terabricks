@@ -5,7 +5,7 @@ temporals/dist/
 
 # Python artifacts
 .pytest_cache/
-*.egg_info
+*.egg-info
 *.pyc
 *.pyo
 *.pyd
