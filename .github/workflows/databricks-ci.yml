@@ -51,7 +51,7 @@ jobs:
       working-directory: temporals
 
     - name: Deploy python wheel
-      run: databricks workspace upload help #--file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
+      run: databricks help #--file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
 
 #    - name: Where am I
 #      run: pwd
