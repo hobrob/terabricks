@@ -50,6 +50,12 @@ jobs:
       run: python setup.py bdist_wheel
       working-directory: temporals
 
+    - name: Where am I
+      run: pwd
+
+    - name: What is here
+      run: ls -la
+
     - name: Deploy python wheel
       run: databricks fs cp "temporals/dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
 
