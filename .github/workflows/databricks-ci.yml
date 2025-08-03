@@ -57,7 +57,7 @@ jobs:
       run: ls -la
 
     - name: Deploy python wheel
-      run: databricks fs cp "temporals/dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
+      run: databricks fs cp "dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
 
       #run: databricks workspace import "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --file "temporals/dist/$WHEEL_NAME"
       #run: databricks workspace help --file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
