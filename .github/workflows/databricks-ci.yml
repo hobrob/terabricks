@@ -50,17 +50,20 @@ jobs:
       run: python setup.py bdist_wheel
       working-directory: temporals
 
-    - name: Help
-      run: databricks volumes --help
+    - name: Inspect wheel contents
+      run: unzip -l dist/terabricks_temporals-0.0.1-py3-none-any.whl | grep validators
 
-    - name: Where am I
-      run: pwd
+#    - name: Help
+#      run: databricks volumes --help
 
-    - name: What is local
-      run: ls -la temporals/dist
+#    - name: Where am I
+#      run: pwd
 
-    - name: What is remote
-      run: databricks volumes list workspace funlib
+#    - name: What is local
+#      run: ls -la temporals/dist
+
+#    - name: What is remote
+#      run: databricks volumes list workspace funlib
 
     - name: Deploy python wheel
       run: databricks fs cp "temporals/dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"

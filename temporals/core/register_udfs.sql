@@ -10,3 +10,20 @@ USE SCHEMA IDENTIFIER(:schema_name);
 SELECT current_catalog(), :catalog_name, current_schema(), :schema_name;
 SELECT current_date();
 SELECT current_user();
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name).SmokeTest()
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"]',
+  environment_version = 'None'
+)
+AS $$
+
+from temporals.core.validators import ping
+
+return ping() == "pong"
+
+$$;
+
+SELECT funlib.SmokeTest();

@@ -10,6 +10,10 @@ from temporals.core.constants import (
     ERRMSG, ERR_ARRAY_LEN, ERR_INVALID_DTTM, ERR_INVALID_FORMAT, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UBOUND_LE_LBOUND)
 
 
+def ping() -> str:
+    return "pong"
+
+
 def validate_period_array(period: List[str]) -> PeriodInfo:
     if isinstance(period, list) and len(period) >= 2:
         start_str, end_str = period[0], period[1]
