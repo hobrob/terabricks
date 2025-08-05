@@ -11,7 +11,7 @@ SELECT current_catalog(), :catalog_name, current_schema(), :schema_name;
 SELECT current_date();
 SELECT current_user();
 
-CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name).SmokeTest()
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.SmokeTest')()
 RETURNS BOOLEAN
 LANGUAGE PYTHON
 ENVIRONMENT (
