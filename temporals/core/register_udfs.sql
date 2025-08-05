@@ -26,4 +26,4 @@ return ping() == "pong"
 
 $$;
 
-SELECT funlib.SmokeTest();
+SELECT current_timestamp(), funlib.SmokeTest();
