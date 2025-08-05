@@ -47,11 +47,10 @@ jobs:
       run: pip install setuptools wheel
 
     - name: Build python wheel
-      run: python setup.py bdist_wheel
-      working-directory: temporals
+      run: python -m build --wheel
 
     - name: Inspect wheel contents
-      run: unzip -l "temporals/dist/terabricks_temporals-0.0.1-py3-none-any.whl"
+      run: unzip -l "dist/terabricks_temporals-0.0.1-py3-none-any.whl"
 
 #    - name: Help
 #      run: databricks volumes --help
@@ -66,7 +65,7 @@ jobs:
 #      run: databricks volumes list workspace funlib
 
     - name: Deploy python wheel
-      run: databricks fs cp "temporals/dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"
+      run: databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"
 
       #run: databricks workspace import "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --file "temporals/dist/$WHEEL_NAME"
       #run: databricks workspace help --file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
