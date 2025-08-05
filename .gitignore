@@ -1,8 +1,8 @@
 # Exclude entire docs directory
-*/docs/
-*/sbox/
-*/dist/
-*/build/
+*docs/
+*sbox/
+*dist/
+*build/
 
 # Python artifacts
 .pytest_cache/
