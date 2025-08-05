@@ -46,8 +46,8 @@ jobs:
     - name: Verify connectivity
       run: databricks workspace list /
 
-    - name: Verify connectivity
-      run: databricks repos list
+    - name: Sync databricks repo folders
+      run: databricks repos update 2518988841556678
 
     - name: Install build dependencies
       run: pip install build
