@@ -62,14 +62,13 @@ jobs:
     - name: var subs for udf registration
       run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
-    - name: List dir
-      run: databricks fs ls "/"
+    - name: Import dir
+      run: databricks workspace import-dir temporals/temp "/Users/robert.price@rpdw.co.uk"
 
-
-    - name: Attempt to deploy temp notebook
-      run: |
-        databricks fs mkdir "/Users/robert.price@rpdw.co.uk/temp"
-        databricks fs cp "temporals/temp/register_udfs.sql" "/Users/robert.price@rpdw.co.uk/temp/" --overwrite
+#    - name: Attempt to deploy temp notebook
+#      run: |
+#        databricks fs mkdir "/Users/robert.price@rpdw.co.uk/temp"
+#        databricks fs cp "temporals/temp/register_udfs.sql" "/Users/robert.price@rpdw.co.uk/temp/" --overwrite
 
 #    - name: Sync databricks repo folders
 #      run: databricks repos update $WORKSPACE_REPO_ID --branch main
