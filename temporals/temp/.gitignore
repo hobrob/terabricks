@@ -1,3 +1,4 @@
 # Ignore all files except .gitkeep to preserve the dir structure
 *
 !.gitkeep
+!register_udfs.sql
