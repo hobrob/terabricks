@@ -55,4 +55,38 @@ SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '
 
 
 
+create or replace function Begin(period array<string>)
+  returns string
+  language python
+  AS $$
 
+    from temporals.core.validators import validate_period_array, validate_instant_string
+    from temporals.core.constants import ERRMSG, ERR_UNKNOWN, TEMPRL, DATE, TIME, TIMESTAMP
+
+    DATE, TIME, TIMESTAMP = range(3)
+    TEMPRL = {
+        DATE: {"keyword": "DATE", "regex":r"^\d{4}-\d{2}-\d{2}$", "format": "%Y-%m-%d"},
+        TIME: {"keyword": "TIME", "regex":r"^\d{2}:\d{2}:\d{2}(\.\d{1,6})?$", "format": "%H:%M:%S"},
+        TIMESTAMP: {"keyword": "TIMESTAMP", "regex":r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?$", "format": "%Y-%m-%d %H:%M:%S"}}
+
+    if period is None:
+        return None
+    validPeriod = validate_period_array(period)
+    if validPeriod:
+        if validPeriod.dttm_type == DATE:
+            return validPeriod.start_ts.strftime(TEMPRL[DATE]["format"])
+        elif validPeriod.dttm_type == TIME:
+            if validPeriod.precision == 0:
+                return validPeriod.start_ts.strftime(TEMPRL[TIME]["format"])
+            else:
+                return validPeriod.start_ts.strftime(TEMPRL[TIME]["format"]+'.%f')
+        elif validPeriod.dttm_type == TIMESTAMP:
+            if validPeriod.precision == 0:
+                return validPeriod.start_ts.strftime(TEMPRL[TIMESTAMP]["format"])
+            else:
+                return validPeriod.start_ts.strftime(TEMPRL[TIMESTAMP]["format"]+'.%f')
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), funlib.Begin(array('2025-06-01', '2025-06-30'));
