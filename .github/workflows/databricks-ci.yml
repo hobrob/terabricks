@@ -90,7 +90,7 @@ jobs:
           \"tasks\": [{
             \"task_key\": \"Launch_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/temp/register_udfs\",
+              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/temp/register_udfs.sql\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
