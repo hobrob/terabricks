@@ -86,9 +86,7 @@ jobs:
               \"base_parameters\": {
                 \"env\": \"ci\",
                 \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\",
-                \"volume_name\": \"$WORKSPACE_VOLUME_PATH\",
-                \"wheel_name\": \"$WHEEL_NAME\"
+                \"schema_name\": \"$SCHEMA_NAME\"
               }
             }
           }]
