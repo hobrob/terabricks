@@ -62,8 +62,8 @@ jobs:
     - name: var subs for udf registration
       run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
-    - name: Deploy python wheel
-      run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
+    - name: List dir
+      run: databricks fs ls "/Users/robert.price@rpdw.co.uk"
 
 
     - name: Attempt to deploy temp notebook
