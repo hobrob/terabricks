@@ -86,27 +86,13 @@ jobs:
               \"base_parameters\": {
                 \"env\": \"ci\",
                 \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\"
+                \"schema_name\": \"$SCHEMA_NAME\",
+                \"volume_name\": \"$WORKSPACE_VOLUME_PATH\",
+                \"wheel_name\": \"$WHEEL_NAME\"
               }
             }
           }]
         }"
-#      run: |
-#        databricks jobs submit --json '{
-#          "run_name": "CI Notebook Run",
-#          "tasks": [{
-#            "task_key": "Launch_Notebook",
-#            "notebook_task": {
-#              "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
-#              "warehouse_id": "610e951eaec62fa1",
-#              "base_parameters": {
-#                "env": "ci",
-#                "catalog_name": "workspace",
-#                "schema_name": "funlib"
-#              }
-#            }
-#          }]
-#        }'
 
     #- name: Run SQL
     #  continue-on-error: true

@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.SmokeT
 RETURNS BOOLEAN
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"]',
+  dependencies = '["'||:volume_name||'/'||:wheel_name||'"]',
   environment_version = 'None'
 )
 AS $$
