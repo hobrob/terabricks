@@ -61,7 +61,7 @@ jobs:
       run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
 
     - name: var subs for udf registration
-      run: sed "s|__WHEEL__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
+      run: sed "s|__WHEEL__|${WHEEL_NAME}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
     - name: Import dir
       run: |
@@ -83,38 +83,32 @@ jobs:
 #      run: pwd
 
 #    - name: What is local
-#      run: ls -la temporals/dist
+#      run: |
+#        pwd
+#        ls -la
+#        ls -la temporals
+#        ls -la temporals/temp
 
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
 
-
-
-    - name: What is local
-      run: |
-        pwd
-        ls -la 
-        ls -la temporals
-        ls -la temporals/temp
-
-    - name: Submit Job Inline
-      run: |
-        databricks jobs submit --json "{
-          \"run_name\": \"CI Notebook Run\",
-          \"tasks\": [{
-            \"task_key\": \"Launch_Notebook\",
-            \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/temp/register_udfs.sql\",
-              \"warehouse_id\": \"$WAREHOUSE_ID\",
-              \"base_parameters\": {
-                \"env\": \"ci\",
-                \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\",
-                \"wheel_name\": \"$WHEEL_NAME\"
-              }
-            }
-          }]
-        }"
+#    - name: Submit Job Inline
+#      run: |
+#        databricks jobs submit --json "{
+#          \"run_name\": \"CI Notebook Run\",
+#          \"tasks\": [{
+#            \"task_key\": \"Launch_Notebook\",
+#            \"notebook_task\": {
+#              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs.sql\",
+#              \"warehouse_id\": \"$WAREHOUSE_ID\",
+#              \"base_parameters\": {
+#                \"env\": \"ci\",
+#                \"catalog_name\": \"$CATALOG_NAME\",
+#                \"schema_name\": \"$SCHEMA_NAME\"
+#              }
+#            }
+#          }]
+#        }"
 
     #- name: Run SQL
     #  continue-on-error: true
