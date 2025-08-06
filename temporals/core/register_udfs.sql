@@ -55,19 +55,17 @@ SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '
 
 
 
-create or replace function Begin(period array<string>)
-  returns string
-  language python
-  AS $$
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Begin')(period array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
 
     from temporals.core.validators import validate_period_array, validate_instant_string
     from temporals.core.constants import ERRMSG, ERR_UNKNOWN, TEMPRL, DATE, TIME, TIMESTAMP
-
-    DATE, TIME, TIMESTAMP = range(3)
-    TEMPRL = {
-        DATE: {"keyword": "DATE", "regex":r"^\d{4}-\d{2}-\d{2}$", "format": "%Y-%m-%d"},
-        TIME: {"keyword": "TIME", "regex":r"^\d{2}:\d{2}:\d{2}(\.\d{1,6})?$", "format": "%H:%M:%S"},
-        TIMESTAMP: {"keyword": "TIMESTAMP", "regex":r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d{1,6})?$", "format": "%Y-%m-%d %H:%M:%S"}}
 
     if period is None:
         return None
