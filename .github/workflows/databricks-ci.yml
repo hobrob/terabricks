@@ -57,13 +57,22 @@ jobs:
       run: unzip -l "dist/$WHEEL_NAME"
 
     - name: Deploy python wheel
-      run: databricks fs cp "dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
+      run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
 
     - name: var subs for udf registration
       run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
-    - name: Sync databricks repo folders
-      run: databricks repos update $WORKSPACE_REPO_ID --branch main
+    - name: Deploy python wheel
+      run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
+
+
+    - name: Attempt to deploy temp notebook
+      run: |
+        databricks fs mkdir "/Users/robert.price@rpdw.co.uk/temp"
+        databricks fs cp "temporals/temp/register_udfs.sql" "/Users/robert.price@rpdw.co.uk/temp/" --overwrite
+
+#    - name: Sync databricks repo folders
+#      run: databricks repos update $WORKSPACE_REPO_ID --branch main
 
 #    - name: Help
 #      run: databricks volumes --help
@@ -81,6 +90,7 @@ jobs:
 
     - name: What is local
       run: |
+        pwd
         ls -la 
         ls -la temporals
         ls -la temporals/temp
