@@ -75,22 +75,38 @@ jobs:
 #      run: databricks volumes list workspace funlib
 
     - name: Submit Job Inline
-      run: |
-        databricks jobs submit --json '{
-          "run_name": "CI Notebook Run",
-          "tasks": [{
-            "task_key": "Launch_Notebook",
-            "notebook_task": {
-              "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
-              "warehouse_id": "610e951eaec62fa1",
-              "base_parameters": {
-                "env": "ci",
-                "catalog_name": "workspace",
-                "schema_name": "funlib"
-              }
+    run: |
+      databricks jobs submit --json "{
+        \"run_name\": \"CI Notebook Run\",
+        \"tasks\": [{
+          \"task_key\": \"Launch_Notebook\",
+          \"notebook_task\": {
+            \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/core/register_udfs\",
+            \"warehouse_id\": \"$WAREHOUSE_ID\",
+            \"base_parameters\": {
+              \"env\": \"ci\",
+              \"catalog_name\": \"$CATALOG_NAME\",
+              \"schema_name\": \"$SCHEMA_NAME\"
             }
-          }]
-        }'
+          }
+        }]
+      }"
+#      run: |
+#        databricks jobs submit --json '{
+#          "run_name": "CI Notebook Run",
+#          "tasks": [{
+#            "task_key": "Launch_Notebook",
+#            "notebook_task": {
+#              "notebook_path": "/Users/robert.price@rpdw.co.uk/terabricks/temporals/core/register_udfs",
+#              "warehouse_id": "610e951eaec62fa1",
+#              "base_parameters": {
+#                "env": "ci",
+#                "catalog_name": "workspace",
+#                "schema_name": "funlib"
+#              }
+#            }
+#          }]
+#        }'
 
     #- name: Run SQL
     #  continue-on-error: true
