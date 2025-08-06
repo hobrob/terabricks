@@ -45,7 +45,7 @@ jobs:
       uses: databricks/setup-cli@main
 
     - name: Verify connectivity
-      run: databricks workspace list /
+      run: databricks workspace list /Users/robert.price@rpdw.co.uk
 
     - name: Install build dependencies
       run: pip install build
@@ -63,7 +63,7 @@ jobs:
       run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
     - name: List dir
-      run: databricks fs ls "dbfs:/Users/robert.price@rpdw.co.uk"
+      run: databricks fs ls "/"
 
 
     - name: Attempt to deploy temp notebook
