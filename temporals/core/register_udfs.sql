@@ -7,15 +7,12 @@
 
 USE CATALOG IDENTIFIER(:catalog_name);
 USE SCHEMA IDENTIFIER(:schema_name);
-SELECT current_catalog(), :catalog_name, current_schema(), :schema_name;
-SELECT current_date();
-SELECT current_user();
 
 CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.SmokeTest')()
 RETURNS BOOLEAN
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl"]',
+  dependencies = '["__WHEEL_PATH__"]',
   environment_version = 'None'
 )
 AS $$
@@ -27,3 +24,7 @@ return ping() == "pong"
 $$;
 
 SELECT current_timestamp(), funlib.SmokeTest();
+
+
+sed "s|__WHEEL_PATH__|${WORKSPACE_VOLUME_PATH}/${WHEEL_NAME}|g" define_temporals_udf.sql > expanded.sql
+

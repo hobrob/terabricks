@@ -74,6 +74,9 @@ jobs:
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
 
+    - name: var subs for udf registration
+      run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
+
     - name: Submit Job Inline
       run: |
         databricks jobs submit --json "{
@@ -81,12 +84,13 @@ jobs:
           \"tasks\": [{
             \"task_key\": \"Launch_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/core/register_udfs\",
+              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/temp/register_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
                 \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\"
+                \"schema_name\": \"$SCHEMA_NAME\",
+                \"wheel_name\": \"$WHEEL_NAME\"
               }
             }
           }]
