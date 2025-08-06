@@ -66,7 +66,7 @@ jobs:
     - name: Import dir
       run: |
         databricks workspace mkdirs "$WORKSPACE_USER_PATH/temp"
-        databricks workspace import-dir temporals/temp "$WORKSPACE_USER_PATH/temp"
+        databricks workspace import-dir temporals/temp "$WORKSPACE_USER_PATH/temp" --overwrite
 
 #    - name: Attempt to deploy temp notebook
 #      run: |
