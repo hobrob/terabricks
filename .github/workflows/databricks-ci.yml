@@ -8,6 +8,7 @@ env:
   WAREHOUSE_ID: ${{ secrets.WAREHOUSE_ID }}
   WAREHOUSE_HTTP_PATH: ${{ secrets.WAREHOUSE_HTTP_PATH }}
   WORKSPACE_REPO_PATH: ${{ secrets.WORKSPACE_REPO_PATH }}
+  WORKSPACE_REPO_ID: ${{ secrets.WORKSPACE_REPO_ID }}
   WORKSPACE_VOLUME_PATH: ${{ secrets.WORKSPACE_VOLUME_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
@@ -59,7 +60,7 @@ jobs:
       run: databricks fs cp "dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
 
     - name: Sync databricks repo folders
-      run: databricks repos update 2518988841556678 --branch main
+      run: databricks repos update $WORKSPACE_REPO_ID --branch main
 
 #    - name: Help
 #      run: databricks volumes --help
