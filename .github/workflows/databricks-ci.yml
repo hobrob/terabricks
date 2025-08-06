@@ -8,6 +8,7 @@ env:
   WAREHOUSE_ID: ${{ secrets.WAREHOUSE_ID }}
   WAREHOUSE_HTTP_PATH: ${{ secrets.WAREHOUSE_HTTP_PATH }}
   WORKSPACE_REPO_PATH: ${{ secrets.WORKSPACE_REPO_PATH }}
+  WORKSPACE_USER_PATH: ${{ secrets.WORKSPACE_USER_PATH }}
   WORKSPACE_REPO_ID: ${{ secrets.WORKSPACE_REPO_ID }}
   WORKSPACE_VOLUME_PATH: ${{ secrets.WORKSPACE_VOLUME_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
@@ -60,10 +61,12 @@ jobs:
       run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
 
     - name: var subs for udf registration
-      run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
+      run: sed "s|__WHEEL_PATH__|${$WORKSPACE_VOLUME_PATH}/${$WHEEL_NAME}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
     - name: Import dir
-      run: databricks workspace import-dir temporals/temp "/Users/robert.price@rpdw.co.uk"
+      run: |
+        databricks workspace mkdirs "$WORKSPACE_USER_PATH/temp"
+        databricks workspace import-dir temporals/temp "$WORKSPACE_USER_PATH/temp"
 
 #    - name: Attempt to deploy temp notebook
 #      run: |
