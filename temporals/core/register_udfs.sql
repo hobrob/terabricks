@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.SmokeT
 RETURNS BOOLEAN
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["__WHEEL_PATH__"]',
+  dependencies = '["__VOLUME__/__WHEEL__"]',
   environment_version = 'None'
 )
 AS $$
