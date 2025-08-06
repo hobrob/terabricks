@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.SmokeT
 RETURNS BOOLEAN
 LANGUAGE PYTHON
 ENVIRONMENT (
-  dependencies = '["'||:volume_name||'/'||:wheel_name||'"]',
+  dependencies = CONCAT('["', :volume_name, '/', :wheel_name, '"]'),
   environment_version = 'None'
 )
 AS $$
