@@ -24,7 +24,3 @@ return ping() == "pong"
 $$;
 
 SELECT current_timestamp(), funlib.SmokeTest();
-
-
-sed "s|__WHEEL_PATH__|${WORKSPACE_VOLUME_PATH}/${WHEEL_NAME}|g" define_temporals_udf.sql > expanded.sql
-
