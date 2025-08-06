@@ -56,7 +56,7 @@ SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '
 
 
 CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Begin')(period array<string>)
-RETURNS BOOLEAN
+RETURNS STRING
 LANGUAGE PYTHON
 ENVIRONMENT (
   dependencies = '["__VOLUME__/__WHEEL__"]',
