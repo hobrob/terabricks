@@ -51,7 +51,7 @@ AS $$
 
 $$;
 
-SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'], '2025-06-15');
+SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '2025-06-15');
 
 
 
