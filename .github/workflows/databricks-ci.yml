@@ -46,7 +46,7 @@ jobs:
       uses: databricks/setup-cli@main
 
     - name: Verify connectivity
-      run: databricks workspace list /Users/robert.price@rpdw.co.uk
+      run: databricks workspace list "$WORKSPACE_USER_PATH"
 
     - name: Install build dependencies
       run: pip install build
@@ -99,7 +99,7 @@ jobs:
           \"tasks\": [{
             \"task_key\": \"Launch_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs.sql\",
+              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
