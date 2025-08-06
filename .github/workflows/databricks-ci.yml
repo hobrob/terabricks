@@ -56,7 +56,7 @@ jobs:
       run: unzip -l "dist/$WHEEL_NAME"
 
     - name: Deploy python wheel
-      run: databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl" --overwrite
+      run: databricks fs cp "dist/$WHEEL_NAME" "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
 
     - name: Sync databricks repo folders
       run: databricks repos update 2518988841556678 --branch main
