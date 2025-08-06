@@ -77,6 +77,12 @@ jobs:
     - name: var subs for udf registration
       run: sed "s|__WHEEL_PATH__|${wheel_path}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
 
+    - name: What is local
+      run: |
+        ls -la 
+        ls -la temporals
+        ls -la temporals/temp
+
     - name: Submit Job Inline
       run: |
         databricks jobs submit --json "{
