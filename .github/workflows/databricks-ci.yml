@@ -46,9 +46,6 @@ jobs:
     - name: Verify connectivity
       run: databricks workspace list /
 
-    - name: Sync databricks repo folders
-      run: databricks repos update 2518988841556678 --branch main
-
     - name: Install build dependencies
       run: pip install build
 
@@ -56,7 +53,13 @@ jobs:
       run: python -m build --wheel
 
     - name: Inspect wheel contents
-      run: unzip -l "dist/terabricks_temporals-0.0.1-py3-none-any.whl"
+      run: unzip -l "dist/$WHEEL_NAME"
+
+    - name: Deploy python wheel
+      run: databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl" --overwrite
+
+    - name: Sync databricks repo folders
+      run: databricks repos update 2518988841556678 --branch main
 
 #    - name: Help
 #      run: databricks volumes --help
@@ -69,17 +72,6 @@ jobs:
 
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
-
-    - name: Deploy python wheel
-      run: databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/workspace/funlib/pypublic/terabricks/terabricks_temporals-0.0.1-py3-none-any.whl" --overwrite
-
-      #run: databricks workspace import "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --file "temporals/dist/$WHEEL_NAME"
-      #run: databricks workspace help --file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
-
-       #--file "temporals/dist/$WHEEL_NAME" --path "$WORKSPACE_VOLUME_PATH/$WHEEL_NAME"
-
-#    - name: Where am I
-#      run: pwd
 
     - name: Submit Job Inline
       run: |
