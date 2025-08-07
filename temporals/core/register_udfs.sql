@@ -57,7 +57,7 @@ AS $$
 
 $$;
 
-SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '2025-06-15');
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Contains')(array('2025-06-01', '2025-06-30'), '2025-06-15');
 
 -- COMMAND ----------
 
@@ -99,7 +99,9 @@ AS $$
 
   $$;
 
-SELECT current_timestamp(), funlib.Begin(array('2025-06-01', '2025-06-30'));
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Begin')(array('2025-06-01', '2025-06-30'));
+
+-- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC ### End(p)
@@ -139,8 +141,9 @@ AS $$
 
   $$;
 
-SELECT current_timestamp(), funlib.End(array('2025-06-01', '2025-06-30'));
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.End')(array('2025-06-01', '2025-06-30'));
 
+-- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC ### Last(p)
@@ -184,6 +187,9 @@ AS $$
 
   $$;
 
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Last')(array('2025-06-01', '2025-06-30'));
+
+-- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC ### Overlaps(p1, p2)
@@ -213,6 +219,9 @@ AS $$
 
   $$;
 
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Overlaps')(array('2025-06-01', '2025-06-30'), array('2025-06-15', '2025-07-15'));
+
+-- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC ### OverlapsLeft(p1, p2)
@@ -242,6 +251,10 @@ AS $$
 
   $$;
 
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.OverlapsLeft')(array('2025-06-01', '2025-06-30'), array('2025-05-15', '2025-06-15'));
+
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC ### OverlapsRight(p1, p2)
 -- MAGIC If p1 and p2 are both valid periods it returns true if p2 overlaps p1 and the lower bound of p2 is greater than or equal to the lower bound of p1, else false. Returns null if either one of p1 or p2 is null.
@@ -270,3 +283,4 @@ AS $$
 
   $$;
 
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.OverlapsRight')(array('2025-06-01', '2025-06-30'), array('2025-06-15', '2025-07-15'));
