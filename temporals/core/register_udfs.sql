@@ -366,7 +366,7 @@ AS $$
         return None
     validInstant = validate_instant_string(instant)
     if validInstant:
-        if is_min_dttm(validInstant.instant_ts, validInstant.dttm_type, validInstant.precision):
+        if is_min_dttm(validInstant.instant_ts, validInstant.dttm_type):
             raise ValueError(ERRMSG[ERR_MIN_DATE])
         if validInstant.dttm_type == DATE:
             return str(validInstant.instant_ts + timedelta(days=1))
