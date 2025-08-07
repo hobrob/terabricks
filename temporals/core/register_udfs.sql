@@ -25,6 +25,8 @@ $$;
 
 SELECT current_timestamp(), funlib.SmokeTest();
 
+-- COMMAND ----------
+
 -- MAGIC %md
 -- MAGIC ### Contains(p, t)
 -- MAGIC Tests t to see if it occurs within the bounds of p, returns true or false.
@@ -56,6 +58,8 @@ AS $$
 $$;
 
 SELECT current_timestamp(), funlib.Contains(array('2025-06-01', '2025-06-30'), '2025-06-15');
+
+-- COMMAND ----------
 
 -- MAGIC %md
 -- MAGIC ### Begin(p)
