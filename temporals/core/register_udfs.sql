@@ -25,6 +25,8 @@ $$;
 
 SELECT current_timestamp(), funlib.SmokeTest();
 
+
+
 -- COMMAND ----------
 
 -- MAGIC %md
@@ -51,7 +53,7 @@ AS $$
         if validInstant:
             if validPeriod.dttm_type != validInstant.dttm_type:
                 raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
-            return validPeriod.start_ts <= validInstant.instant_ts < validPeriod.end_ts:
+            return validPeriod.start_ts <= validInstant.instant_ts < validPeriod.end_ts
     raise RuntimeError(ERRMSG[ERR_UNKNOWN])
 
 $$;
