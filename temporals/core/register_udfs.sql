@@ -29,7 +29,7 @@ SELECT current_timestamp(), funlib.SmokeTest();
 
 -- MAGIC %md
 -- MAGIC ### Contains(p, t)
--- MAGIC Tests t to see if it occurs within the bounds of p, returns true or false.
+-- MAGIC Returns true if t occurs within the bounds of p, else returns false or null if p or t are null.
 
 -- COMMAND ----------
 
@@ -49,15 +49,52 @@ AS $$
     if validPeriod:
         validInstant = validate_instant_string(instant, validPeriod.dttm_type, validPeriod.precision)
         if validInstant:
-            if validPeriod.start_ts <= validInstant.instant_ts < validPeriod.end_ts:
-                return True
-            else:
-                return False
+            if validPeriod.dttm_type != validInstant.dttm_type:
+                raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+            return validPeriod.start_ts <= validInstant.instant_ts < validPeriod.end_ts:
     raise RuntimeError(ERRMSG[ERR_UNKNOWN])
 
 $$;
 
 SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Contains')(array('2025-06-01', '2025-06-30'), '2025-06-15');
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Consumes(p1, p2)
+-- MAGIC Returns true if p1 is at least equal to or fully engulfs p2, else returns false or null if p1 or p2 are null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Consumes')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type != validPeriod2.dttm_type:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+        return validPeriod1.start_ts <= validPeriod1.start_ts and validPeriod1.end_ts >= validPeriod1.end_ts
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+$$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Consumes')(array('2025-06-01', '2025-07-01'), array('2025-06-10', '2025-06-20'));
+
+
 
 -- COMMAND ----------
 
@@ -189,6 +226,8 @@ AS $$
 
 SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Last')(array('2025-06-01', '2025-06-30'));
 
+
+
 -- COMMAND ----------
 
 -- MAGIC %md
@@ -221,6 +260,8 @@ AS $$
 
 SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Overlaps')(array('2025-06-01', '2025-06-30'), array('2025-06-15', '2025-07-15'));
 
+
+
 -- COMMAND ----------
 
 -- MAGIC %md
@@ -252,6 +293,8 @@ AS $$
   $$;
 
 SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.OverlapsLeft')(array('2025-06-01', '2025-06-30'), array('2025-05-15', '2025-06-15'));
+
+
 
 -- COMMAND ----------
 
@@ -369,7 +412,7 @@ AS $$
         if is_min_dttm(validInstant.instant_ts, validInstant.dttm_type):
             raise ValueError(ERRMSG[ERR_MIN_DATE])
         if validInstant.dttm_type == DATE:
-            return str(validInstant.instant_ts + timedelta(days=1))
+            return str(validInstant.instant_ts - timedelta(days=1))
         elif validInstant.dttm_type == TIME:
             calendarised_end_ts = datetime.combine(datetime.today(), validInstant.instant_ts)
             if validInstant.precision == 0:
@@ -481,8 +524,13 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Meets
 
 
 
+-- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC ### IntervalString(p, q)
+-- MAGIC Returns a string representing the duration of p in a format that is castable to the interval type specified by q
 
+-- COMMAND ----------
 
 CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalString')(period array<string>, interval_qualifier string)
 RETURNS STRING
@@ -493,7 +541,7 @@ ENVIRONMENT (
 )
 AS $$
 
-    from datetime import relativedelta
+    from dateutil.relativedelta import relativedelta
 
     from temporals.core.validators import validate_period_array, validate_instant_string
     from temporals.core.utils import is_max_dttm, format_second_precision
@@ -570,6 +618,17 @@ AS $$
 
   $$;
 
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Interval*[<q>|<q_abbrv>]*(p)
+-- MAGIC Two udfs exist for each interval type, one with a fully verbose interval qualifier in the function name and the second an abbreviated shorthand variation.
+-- MAGIC The verbosely named udfs make a call to IntervalString, passing a hardcoded shorthand qualifier to indicate which interval format it expects the return string to be in. The shorthand-named udf simply calls the verbosely named version
+
+-- COMMAND ----------
+
 CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalYear')(period array<string>)
   RETURNS INTERVAL YEAR
     RETURN CAST(IntervalString(period, 'Y') AS INTERVAL YEAR);
@@ -578,3 +637,540 @@ CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Interv
   RETURNS INTERVAL YEAR
     RETURN IntervalYear(period);
 
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalYearToMonth')(period array<string>)
+  RETURNS INTERVAL YEAR TO MONTH
+    RETURN CAST(IntervalString(period, 'Y2M') AS INTERVAL YEAR TO MONTH);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalY2M')(period array<string>)
+  RETURNS INTERVAL YEAR TO MONTH
+    RETURN IntervalYearToMonth(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalMonth')(period array<string>)
+  RETURNS INTERVAL MONTH
+    RETURN CAST(IntervalString(period, 'MO') AS INTERVAL MONTH);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalMo')(period array<string>)
+  RETURNS INTERVAL MONTH
+    RETURN IntervalMonth(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalDay')(period array<string>)
+  RETURNS INTERVAL DAY
+    RETURN CAST(IntervalString(period, 'D') AS INTERVAL DAY);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalD')(period array<string>)
+  RETURNS INTERVAL DAY
+    RETURN IntervalDay(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalDayToHour')(period array<string>)
+  RETURNS INTERVAL DAY TO HOUR
+    RETURN CAST(IntervalString(period, 'D2H') AS INTERVAL DAY TO HOUR);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalD2H')(period array<string>)
+  RETURNS INTERVAL DAY TO HOUR
+    RETURN IntervalDayToHour(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalDayToMinute')(period array<string>)
+  RETURNS INTERVAL DAY TO MINUTE
+    RETURN CAST(IntervalString(period, 'D2M') AS INTERVAL DAY TO MINUTE);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalD2M')(period array<string>)
+  RETURNS INTERVAL DAY TO MINUTE
+    RETURN IntervalDayToMinute(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalDayToSecond')(period array<string>)
+  RETURNS INTERVAL DAY TO SECOND
+    RETURN CAST(IntervalString(period, 'D2S') AS INTERVAL DAY TO SECOND);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalD2S')(period array<string>)
+  RETURNS INTERVAL DAY TO SECOND
+    RETURN IntervalDayToSecond(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalHour')(period array<string>)
+  RETURNS INTERVAL HOUR
+    RETURN CAST(IntervalString(period, 'H') AS INTERVAL HOUR);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalH')(period array<string>)
+  RETURNS INTERVAL HOUR
+    RETURN IntervalHour(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalHourToMinute')(period array<string>)
+  RETURNS INTERVAL HOUR TO MINUTE
+    RETURN CAST(IntervalString(period, 'H2M') AS INTERVAL HOUR TO MINUTE);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalH2M')(period array<string>)
+  RETURNS INTERVAL HOUR TO MINUTE
+    RETURN IntervalHourToMinute(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalHourToSecond')(period array<string>)
+  RETURNS INTERVAL HOUR TO SECOND
+    RETURN CAST(IntervalString(period, 'H2S') AS INTERVAL HOUR TO SECOND);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalH2S')(period array<string>)
+  RETURNS INTERVAL HOUR TO SECOND
+    RETURN IntervalHourToSecond(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalMinute')(period array<string>)
+  RETURNS INTERVAL MINUTE
+    RETURN CAST(IntervalString(period, 'M') AS INTERVAL MINUTE);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalMi')(period array<string>)
+  RETURNS INTERVAL MINUTE
+    RETURN IntervalMinute(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalMinuteToSecond')(period array<string>)
+  RETURNS INTERVAL MINUTE TO SECOND
+    RETURN CAST(IntervalString(period, 'M2S') AS INTERVAL MINUTE TO SECOND);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalM2S')(period array<string>)
+  RETURNS INTERVAL MINUTE TO SECOND
+    RETURN IntervalMinuteToSecond(period);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalSecond')(period array<string>)
+  RETURNS INTERVAL SECOND
+    RETURN CAST(IntervalString(period, 'S') AS INTERVAL SECOND);
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IntervalS')(period array<string>)
+  RETURNS INTERVAL SECOND
+    RETURN IntervalSecond(period);
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### IsUntilChanged(p)
+-- MAGIC Returns true if the upper bound of p is set to the highest possible date and/or time in the system - 9999-12-31 23:59:59.999999, else false, or null if p is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.IsUntilChanged')(period array<string>)
+RETURNS STRING
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.utils import is_max_dttm
+    from temporals.core.constants import ERRMSG, ERR_UNKNOWN
+
+    if period is None:
+        return None
+    validPeriod = validate_period_array(period)
+    if validPeriod:
+        return is_max_dttm(validPeriod.end_ts, validPeriod.dttm_type, validPeriod.precision)
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.IsUntilChanged')(array('2025-06-01', '9999-12-31'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Equals(p1, p2)
+-- MAGIC Returns true if the upper and lower bound of both p1 and p2 are equal, else false, or returns null if either p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Equals')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.start_ts == validPeriod2.start_ts and validPeriod1.end_ts == validPeriod2.end_ts:
+                    return True
+                else:
+                    return False
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Equals')(array('2025-06-01', '2025-07-01'), array('2025-06-01', '2025-07-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Precedes(p1, p2)
+-- MAGIC Returns true if the upper bound of p1 is less than or equal to the lower bound of p2, else return false, or returns null if either p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Precedes')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.end_ts <= validPeriod2.start_ts:
+                    return True
+                else:
+                    return False
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Precedes')(array('2025-03-01', '2025-04-01'), array('2025-06-01', '2025-07-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### ImmediatelyPrecedes(p1, p2)
+-- MAGIC Returns true if the upper bound of p1 is equal to the lower bound of p2, else return false, or returns null if either p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.ImmediatelyPrecedes')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.end_ts == validPeriod2.start_ts:
+                    return True
+                else:
+                    return False
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.ImmediatelyPrecedes')(array('2025-05-01', '2025-06-01'), array('2025-06-01', '2025-07-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Succeeds(p1, p2)
+-- MAGIC Returns true if the lower bound of p1 is greater than or equal to the upper bound of p2, else return false, or returns null if either p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.Succeeds')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.start_ts >= validPeriod2.end_ts:
+                    return True
+                else:
+                    return False
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Succeeds')(array('2025-03-01', '2025-04-01'), array('2025-06-01', '2025-07-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### ImmediatelySucceeds(p1, p2)
+-- MAGIC Returns true if the lower bound of p1 is equal to the upper bound of p2, else return false, or returns null if either p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.ImmediatelySucceeds')(period1 array<string>, period2 array<string>)
+RETURNS BOOLEAN
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.start_ts == validPeriod2.end_ts:
+                    return True
+                else:
+                    return False
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.ImmediatelySucceeds')(array('2025-05-01', '2025-06-01'), array('2025-06-01', '2025-07-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### LDiff(p1, p2)
+-- MAGIC Returns a period-compliant array representing the leftmost section of p1 that exists before the lower bound of p2, or returns null if the periods do not sufficiently overlap or p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.LDiff')(period1 array<string>, period2 array<string>)
+RETURNS ARRAY<STRING>
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.utils import format_precision
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN, DATE, TIME
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.end_ts <= validPeriod2.start_ts or validPeriod1.start_ts >= validPeriod2.end_ts or validPeriod1.start_ts == validPeriod2.start_ts:
+                    return None
+                else:
+                    if validPeriod1.dttm_type == DATE or (validPeriod1.dttm_type == TIME and validPeriod1.precision == 0):
+                        return [str(validPeriod1.start_ts), str(validPeriod2.start_ts)]
+                    else:
+                        return [format_precision(validPeriod1.start_ts, validPeriod1.precision), format_precision(validPeriod2.start_ts, validPeriod1.precision)]
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.LDiff')(array('2025-05-01', '2025-07-01'), array('2025-06-01', '2025-08-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### RDiff(p1, p2)
+-- MAGIC Returns a period-compliant array representing the rightmost section of p1 that exists after the upper bound of p2, or returns null if the periods do not sufficiently overlap or p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.RDiff')(period1 array<string>, period2 array<string>)
+RETURNS ARRAY<STRING>
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.utils import format_precision
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN, DATE, TIME
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.start_ts >= validPeriod2.end_ts or validPeriod1.end_ts <= validPeriod2.start_ts or validPeriod2.end_ts == validPeriod1.end_ts:
+                    return None
+                else:
+                    if validPeriod1.dttm_type == DATE or (validPeriod1.dttm_type == TIME and validPeriod1.precision == 0):
+                        return [str(validPeriod1.end_ts), str(validPeriod2.end_ts)]
+                    else:
+                        return [format_precision(validPeriod1.end_ts, validPeriod1.precision), format_precision(validPeriod2.end_ts, validPeriod1.precision)]
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.RDiff')(array('2025-05-01', '2025-07-01'), array('2025-06-01', '2025-08-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### P_Intermediate(p1, p2)
+-- MAGIC Returns a period-compliant array representing any gap between p1 and p2, or returns null if the periods overlap or p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.P_Intermediate')(period1 array<string>, period2 array<string>)
+RETURNS ARRAY<STRING>
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.utils import format_precision
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN, DATE, TIME
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.end_ts <= validPeriod2.start_ts:
+                    if validPeriod1.dttm_type == DATE or (validPeriod1.dttm_type == TIME and validPeriod1.precision == 0):
+                        return [str(validPeriod1.end_ts), str(validPeriod2.start_ts)]
+                    else:
+                        return [format_precision(validPeriod1.end_ts, validPeriod1.precision), format_precision(validPeriod2.start_ts, validPeriod1.precision)]
+                elif validPeriod1.start_ts >= validPeriod2.end_ts:
+                    if validPeriod1.dttm_type == DATE or (validPeriod1.dttm_type == TIME and validPeriod1.precision == 0):
+                        return [str(validPeriod2.end_ts), str(validPeriod1.start_ts)]
+                    else:
+                        return [format_precision(validPeriod2.end_ts, validPeriod1.precision), format_precision(validPeriod1.start_ts, validPeriod1.precision)]
+                else:
+                    return None
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.P_Intermediate')(array('2025-02-01', '2025-04-01'), array('2025-06-01', '2025-08-01'));
+
+
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### P_Intersect(p1, p2)
+-- MAGIC Returns a period-compliant array representing the overlap p1 and p2, or returns null if the periods do not overlap or p1 or p2 is null.
+
+-- COMMAND ----------
+
+CREATE OR REPLACE FUNCTION IDENTIFIER(:catalog_name||'.'||:schema_name||'.P_Intersect')(period1 array<string>, period2 array<string>)
+RETURNS ARRAY<STRING>
+LANGUAGE PYTHON
+ENVIRONMENT (
+  dependencies = '["__VOLUME__/__WHEEL__"]',
+  environment_version = 'None'
+)
+AS $$
+
+    from temporals.core.validators import validate_period_array
+    from temporals.core.utils import format_precision
+    from temporals.core.constants import ERRMSG, ERR_TYPE_MISMATCH, ERR_PRECISION_MISMATCH, ERR_UNKNOWN, DATE, TIME
+
+    if period1 is None or period2 is None:
+        return None
+    validPeriod1 = validate_period_array(period1)
+    validPeriod2 = validate_period_array(period2)
+    if validPeriod1 and validPeriod2:
+        if validPeriod1.dttm_type == validPeriod2.dttm_type:
+            if validPeriod1.precision == validPeriod2.precision:
+                if validPeriod1.end_ts <= validPeriod2.start_ts or validPeriod1.start_ts >= validPeriod2.end_ts:
+                    return None
+                else:
+                    if validPeriod1.dttm_type == DATE or (validPeriod1.dttm_type == TIME and validPeriod1.precision == 0):
+                        return [str(validPeriod2.start_ts), str(validPeriod1.end_ts)]
+                    else:
+                        return [format_precision(validPeriod2.start_ts, validPeriod1.precision), format_precision(validPeriod1.end_ts, validPeriod1.precision)]
+            else:
+                raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
+        else:
+            raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
+    raise RuntimeError(ERRMSG[ERR_UNKNOWN])
+
+  $$;
+
+SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.P_Intersect')(array('2025-05-01', '2025-07-01'), array('2025-06-01', '2025-08-01'));
