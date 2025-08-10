@@ -8,7 +8,7 @@ Alongside the period type, it also offers a mature set of [functions and operato
 
 ### Table of Contents
 🚀 [1.Getting Started](#001)<br /> 
-🌐 [2.Overview](#002)<br />
+🌐 [2.Overview](#overview)<br />
 ⚠️[3.Differences and Limitations](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](https://github.com/hobrob/terabricks/edit/main/temporals/README.md)<br />
@@ -95,7 +95,7 @@ For those who want to dive right in follow these steps to install and register t
    array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
    ```
 
-<a name="002"></a>
+<a name="overview"></a>
 ## 🌐 2. Overview
 
 Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single field, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
