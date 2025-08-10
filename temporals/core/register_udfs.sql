@@ -818,7 +818,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Equal
 
 -- MAGIC %md
 -- MAGIC ### Precedes(p1, p2)
--- MAGIC Returns true if the upper bound of p1 is less than or equal to the lower bound of p2, else return false, or returns null if either p1 or p2 is null.
+-- MAGIC Returns true if the upper bound of p1 is less than or equal to the lower bound of p2, else returns false, or returns null if either p1 or p2 is null.
 
 -- COMMAND ----------
 
@@ -861,7 +861,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Prece
 
 -- MAGIC %md
 -- MAGIC ### ImmediatelyPrecedes(p1, p2)
--- MAGIC Returns true if the upper bound of p1 is equal to the lower bound of p2, else return false, or returns null if either p1 or p2 is null.
+-- MAGIC Returns true if the upper bound of p1 is equal to the lower bound of p2, else returns false, or returns null if either p1 or p2 is null.
 
 -- COMMAND ----------
 
@@ -904,7 +904,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Immed
 
 -- MAGIC %md
 -- MAGIC ### Succeeds(p1, p2)
--- MAGIC Returns true if the lower bound of p1 is greater than or equal to the upper bound of p2, else return false, or returns null if either p1 or p2 is null.
+-- MAGIC Returns true if the lower bound of p1 is greater than or equal to the upper bound of p2, else returns false, or returns null if either p1 or p2 is null.
 
 -- COMMAND ----------
 
@@ -947,7 +947,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.Succe
 
 -- MAGIC %md
 -- MAGIC ### ImmediatelySucceeds(p1, p2)
--- MAGIC Returns true if the lower bound of p1 is equal to the upper bound of p2, else return false, or returns null if either p1 or p2 is null.
+-- MAGIC Returns true if the lower bound of p1 is equal to the upper bound of p2, else returns false, or returns null if either p1 or p2 is null.
 
 -- COMMAND ----------
 
@@ -1084,7 +1084,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.RDiff
 
 -- MAGIC %md
 -- MAGIC ### P_Intermediate(p1, p2)
--- MAGIC Returns a period-compliant array representing any gap between p1 and p2, or returns null if the periods overlap or p1 or p2 is null.
+-- MAGIC Returns a period-compliant array representing the gap between p1 and p2 if it exists, or returns null if the periods overlap or one of p1 and p2 is null.
 
 -- COMMAND ----------
 
@@ -1136,7 +1136,7 @@ SELECT current_timestamp(), IDENTIFIER(:catalog_name||'.'||:schema_name||'.P_Int
 
 -- MAGIC %md
 -- MAGIC ### P_Intersect(p1, p2)
--- MAGIC Returns a period-compliant array representing the overlap p1 and p2, or returns null if the periods do not overlap or p1 or p2 is null.
+-- MAGIC Returns a period-compliant array representing the overlap between p1 and p2 if it exists, or returns null if the periods do not overlap or one of p1 and p2 is null.
 
 -- COMMAND ----------
 
