@@ -12,7 +12,7 @@ Alongside the period type, it also offers a mature set of [functions and operato
 ⚠️[3.Differences and Limitations](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
-🛣️️ [6.Roadmap](#006)
+🛣️️ [6.Roadmap](https://github.com/hobrob/terabricks/edit/main/temporals/README.md#%EF%B8%8F%EF%B8%8F-6-roadmap)
 
 <a id="001"></a>
 ## 🚀 1. Getting Started
@@ -98,7 +98,7 @@ For those who want to dive right in follow these steps to install and register t
 <a id="002"></a>
 ## 🌐 2. Overview
 
-Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single column, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
+Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single field, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
 
 Data structures where the validity of a row is determined by start and end dates and / or times often use a convention where the end date is assigned the highest possible value. For dates this is 9999-12-31, for times this is 23:59:59.999999, and for timestamps it is the composite of these two values. In Teradata this value is represented by the constant UNTIL_CHANGED.
 
