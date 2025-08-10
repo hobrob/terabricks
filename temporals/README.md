@@ -2,21 +2,22 @@
 
 ### Introduction
 
-The Teradata data warehouse platform implements a composite data type known as a Period that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 slowly changing dimension (SCD) data structures.
+The [Teradata](https://www.teradata.com/) data warehouse platform implements a composite data type known as a [Period](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Data-Types/Data-Types-and-Literals/Period-Data-Types) that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 slowly changing dimension (SCD) data structures.
 
-Alongside the period type, it also offers a mature set of functions and operators that simplify the sometimes complex interplay of predicates required to make sense of data over time, and does so in the verbose and intuitive style that is typical of SQL. Databricks has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
+Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) that simplify the sometimes complex interplay of predicates required to make sense of data over time, and does so in the verbose and intuitive style that is typical of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
 
 ### Table of Contents
-🚀 1.Getting Started<br /> 
-🌐 2.Overview <br />
-⚠️ 3.Differences and Limitations<br /> 
-🧩 4.Extensions<br />
-🧮 5.Table of Functions and Operators<br />
-🛣️️ 6.Roadmap
+🚀 [1.Getting Started](#001)<br /> 
+🌐 [2.Overview](#002)<br />
+⚠️[3.Differences and Limitations](#003)<br /> 
+🧩 [4.Extensions](#004)<br />
+🧮 [5.Table of Functions and Operators](#005)<br />
+🛣️️ [6.Roadmap](#006)
 
+<a id="001"></a>
 ## 🚀 1. Getting Started
 
-For those who want to dive right in follow these steps to install and register the temporals UDFs in your Databricks workspace. Read on further below for further context and reference points.
+For those who want to dive right in follow these steps to install and register the temporals UDFs in your Databricks workspace. Read on further below for more context and reference material.
 
 1. **Clone the repository**
    ```bash
@@ -94,6 +95,7 @@ For those who want to dive right in follow these steps to install and register t
    array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
    ```
 
+<a id="002"></a>
 ## 🌐 2. Overview
 
 Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single column, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
@@ -106,7 +108,7 @@ The set of functions and operators that accompany the period data type have been
 - Set operations - These return a period object based on a set operation carried out on two periods, such as P_Intersect, that returns a period representing the overlap between two periods. 
 - Table functions - These can be used in the context of an SQL from clause to expand period types row-wise into table-like structures. These are currently out of scope of this project but may be explored in the future.   
 
-
+<a id="003"></a>
 ## ⚠️ 3. Differences and Limitations
 
 #### Data Types
@@ -125,7 +127,7 @@ Time and timestamp types in Teradata have strongly typed precision whereas Datab
 
 The Terabricks set of UDFs in the MVP version are not currently timezone aware. Any timezone related calculations should be handled outside of the UDFs, or wait until the next version of Terabricks.
 
-
+<a id="004"></a>
 ## 🧩 4. Extensions
 
 The full set of informational, sequencing, and set operation functions and operators have all been replicated in some form or another, but some additional functions are also provided to extend the functionality available in Teradata.
@@ -135,7 +137,7 @@ The full set of informational, sequencing, and set operation functions and opera
 - **OverlapsRight(p1, p2) -** Similar to OverlapsLeft but tests whether p1 overlaps p2 where a portion of p1 occurs after the end of p2.
 - **P_Intermediate(p1, p2) -** If p1 and p2 do not overlap and are not immediately adjacent, this returns a period that represents the gap between p1 and p2
 
-
+<a id="005"></a>
 ## 🧮 5. Table of Functions and Operators
 
 In the following table the placeholders p, p1, and p2 represent periods and t represents point-in-time instants. For the Terabricks equivalent UDFs, where a return type of DATE/TIME/TIMESTAMP is given this actually equates to an ISO 8601 compliant string, and PERIOD equates to a two-element array of ISO 8601 compliant strings. 
@@ -179,7 +181,7 @@ In the following table the placeholders p, p1, and p2 represent periods and t re
 | Set operations | p1 P_INTERSECT p2            | P_Intersect(p1, p2)                       | PERIOD                    |                                                                                                                                    |
 | Set operations | n/a                          | P_Intermediate(p1, p2)                    | PERIOD                    |                                                                                                                                    |
 
-
+<a id="006"></a>
 ## 🛣️️ 6. Roadmap
 
 This is a wishlist of things that will be added in future releases on a best endeavours basis.
