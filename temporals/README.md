@@ -95,7 +95,7 @@ For those who want to dive right in follow these steps to install and register t
    array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
    ```
 
-<a name="overview"></a>
+<a id="overview"></a>
 ## 🌐 2. Overview
 
 Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single field, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
