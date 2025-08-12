@@ -64,7 +64,9 @@ jobs:
         databricks fs cp "temporals/test/$TEST_DATA" "dbfs:$WORKSPACE_VOLUME_PATH/$TEST_DATA" --overwrite
 
     - name: var subs for udf registration
-      run: sed "s|__VOLUME__|${WORKSPACE_VOLUME_PATH}|g;s|__WHEEL__|${WHEEL_NAME}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
+      run: |
+        sed "s|__VOLUME__|${WORKSPACE_VOLUME_PATH}|g;s|__WHEEL__|${WHEEL_NAME}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
+        sed "s|__VOLUME__|${WORKSPACE_VOLUME_PATH}|g;s|__TEST_DATA__|${TEST_DATA}|g" temporals/test/test_udfs.sql > temporals/temp/test_udfs.sql
 
     - name: Import dir
       run: |
@@ -120,14 +122,12 @@ jobs:
           \"tasks\": [{
             \"task_key\": \"Launch_Test_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/test/test_udfs\",
+              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/test_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
                 \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\",
-                \"volume_path\": \"$WORKSPACE_VOLUME_PATH\",
-                \"test_data\": \"$TEST_DATA\"
+                \"schema_name\": \"$SCHEMA_NAME\"
               }
             }
           }]

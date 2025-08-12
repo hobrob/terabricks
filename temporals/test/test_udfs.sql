@@ -11,7 +11,7 @@ USE SCHEMA IDENTIFIER(:schema_name);
 CREATE OR REPLACE VIEW test_udf_inputs as
 SELECT concat(TestCaseSubject, '_', lpad(string(TestCaseNumber), 3, '0')) AS TestCaseId, t.*
 FROM read_files(
-  'dbfs:'||:volume_path||'/'||:test_data,
+  'dbfs:__VOLUME__/__TEST_DATA__',
   format => 'csv',
   header => 'true',
   delimiter => '|') t;
