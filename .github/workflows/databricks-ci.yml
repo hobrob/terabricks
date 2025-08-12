@@ -14,6 +14,7 @@ env:
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
   WHEEL_NAME: "terabricks_temporals-0.0.1-py3-none-any.whl"
+  TEST_DATA: "sql_test_data.csv"
 
 jobs:
   test-and-register:
@@ -57,8 +58,10 @@ jobs:
     - name: Inspect wheel contents
       run: unzip -l "dist/$WHEEL_NAME"
 
-    - name: Deploy python wheel
-      run: databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
+    - name: Deploy artefacts to volume - python wheel and test data csv
+      run: | 
+        databricks fs cp "dist/$WHEEL_NAME" "dbfs:$WORKSPACE_VOLUME_PATH/$WHEEL_NAME" --overwrite
+        databricks fs cp "temporals/test/$TEST_DATA" "dbfs:$WORKSPACE_VOLUME_PATH/$TEST_DATA" --overwrite
 
     - name: var subs for udf registration
       run: sed "s|__VOLUME__|${WORKSPACE_VOLUME_PATH}|g;s|__WHEEL__|${WHEEL_NAME}|g" temporals/core/register_udfs.sql > temporals/temp/register_udfs.sql
@@ -92,12 +95,12 @@ jobs:
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
 
-    - name: Submit Job Inline
+    - name: Submit UDF Registration Inline
       run: |
         databricks jobs submit --json "{
-          \"run_name\": \"CI Notebook Run\",
+          \"run_name\": \"CI Notebook UDF Registration\",
           \"tasks\": [{
-            \"task_key\": \"Launch_Notebook\",
+            \"task_key\": \"Launch_Reg_Notebook\",
             \"notebook_task\": {
               \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
@@ -110,6 +113,25 @@ jobs:
           }]
         }"
 
+    - name: Submit UDF Testing Inline
+      run: |
+        databricks jobs submit --json "{
+          \"run_name\": \"CI Notebook UDF Testing\",
+          \"tasks\": [{
+            \"task_key\": \"Launch_Test_Notebook\",
+            \"notebook_task\": {
+              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/test/test_udfs.sql\",
+              \"warehouse_id\": \"$WAREHOUSE_ID\",
+              \"base_parameters\": {
+                \"env\": \"ci\",
+                \"catalog_name\": \"$CATALOG_NAME\",
+                \"schema_name\": \"$SCHEMA_NAME\",
+                \"volume_path\": \"$WORKSPACE_VOLUME_PATH\",
+                \"test_data\": \"$TEST_DATA\"
+              }
+            }
+          }]
+        }"
     #- name: Run SQL
     #  continue-on-error: true
     #  run: bash .github/workflows/databricks-ci.sh temporals/core/register_udfs.sql
