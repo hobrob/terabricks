@@ -5,8 +5,8 @@
 
 -- COMMAND ----------
 
-USE CATALOG :catalog_name;
-USE SCHEMA :schema_name;
+USE CATALOG IDENTIFIER(:catalog_name);
+USE SCHEMA IDENTIFIER(:schema_name);
 
 CREATE OR REPLACE VIEW test_udf_inputs as
 SELECT concat(TestCaseSubject, '_', lpad(string(TestCaseNumber), 3, '0')) AS TestCaseId, t.*
