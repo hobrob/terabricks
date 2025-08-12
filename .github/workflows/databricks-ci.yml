@@ -120,7 +120,7 @@ jobs:
           \"tasks\": [{
             \"task_key\": \"Launch_Test_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/test/test_udfs.sql\",
+              \"notebook_path\": \"$WORKSPACE_REPO_PATH/terabricks/temporals/test/test_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
