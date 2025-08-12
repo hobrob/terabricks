@@ -12,7 +12,7 @@ ERR_ARRAY_LEN, ERR_INVALID_DTTM, ERR_INVALID_FORMAT, \
 ERR_UNKNOWN = 99
 ERRMSG = {
     ERR_ARRAY_LEN: "Period argument expects an array with two or more elements.",
-    ERR_INVALID_FORMAT: "Invalid date, time, or timestamp format encountered.",
+    ERR_INVALID_FORMAT: "Invalid or inconsistent date, time, or timestamp format encountered.",
     ERR_INVALID_DTTM: "Invalid date, time, or timestamp value encountered.",
     ERR_TYPE_MISMATCH: "The types of the period or instant arguments do not match.",
     ERR_PRECISION_MISMATCH: "The precision of the period or instant arguments do not match.",

@@ -35,12 +35,7 @@ WHERE FALSE;
 
 BEGIN
 
-    DECLARE catl STRING;
-    DECLARE schm STRING;
     DECLARE SQLTx STRING DEFAULT '';
-
-    SET catl = :catalog_name;
-    SET schm = :schema_name;
 
     TestLoop: FOR row AS
         SELECT TestCaseId, TestNotes, concat(current_catalog(), '.', current_schema(), '.', TestSQL) AS TestSQL, ExpectedResult FROM test_udf_inputs ORDER BY TestCaseId DO

@@ -47,7 +47,7 @@ def is_min_dttm(instant_ts: date | time | datetime, dttm_type: int) -> bool:
     elif dttm_type == TM:
         return instant_ts == datetime.min.time()
     elif dttm_type == TS:
-        return datetime.min
+        return instant_ts == datetime.min
     return False
 
 

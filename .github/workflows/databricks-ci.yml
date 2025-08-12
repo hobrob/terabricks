@@ -97,32 +97,15 @@ jobs:
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
 
-#    - name: Submit UDF Registration Inline
-#      run: |
-#        databricks jobs submit --json "{
-#          \"run_name\": \"CI Notebook UDF Registration\",
-#          \"tasks\": [{
-#            \"task_key\": \"Launch_Reg_Notebook\",
-#            \"notebook_task\": {
-#              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
-#              \"warehouse_id\": \"$WAREHOUSE_ID\",
-#              \"base_parameters\": {
-#                \"env\": \"ci\",
-#                \"catalog_name\": \"$CATALOG_NAME\",
-#                \"schema_name\": \"$SCHEMA_NAME\"
-#              }
-#            }
-#          }]
-#        }"
-
-    - name: Submit UDF Testing Inline
+    - name: Submit UDF Registration Inline
+      if: ${{ !contains(github.event.head_commit.message, '[skip runsql]') && !contains(github.event.head_commit.message, '[skip regsql]') }}
       run: |
         databricks jobs submit --json "{
-          \"run_name\": \"CI Notebook UDF Testing\",
+          \"run_name\": \"CI Notebook UDF Registration\",
           \"tasks\": [{
-            \"task_key\": \"Launch_Test_Notebook\",
+            \"task_key\": \"Launch_Reg_Notebook\",
             \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/test_udfs\",
+              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
               \"warehouse_id\": \"$WAREHOUSE_ID\",
               \"base_parameters\": {
                 \"env\": \"ci\",
@@ -132,11 +115,23 @@ jobs:
             }
           }]
         }"
-    #- name: Run SQL
-    #  continue-on-error: true
-    #  run: bash .github/workflows/databricks-ci.sh temporals/core/register_udfs.sql
 
-      #      run: dbsqlcli --clirc temporals/core/.dbsqlclirc -e temporals/core/register_udfs.sql --hostname $DATABRICKS_HOST --http-path $WAREHOUSE_HTTP_PATH --access-token $DATABRICKS_TOKEN --catalog_name="workspace"
+#    - name: Submit UDF Testing Inline
+#      if: ${{ !contains(github.event.head_commit.message, '[skip runsql]') && !contains(github.event.head_commit.message, '[skip testsql]') }}
+#      run: |
+#        databricks jobs submit --json "{
+#          \"run_name\": \"CI Notebook UDF Testing\",
+#          \"tasks\": [{
+#            \"task_key\": \"Launch_Test_Notebook\",
+#            \"notebook_task\": {
+#              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/test_udfs\",
+#              \"warehouse_id\": \"$WAREHOUSE_ID\",
+#              \"base_parameters\": {
+#                \"env\": \"ci\",
+#                \"catalog_name\": \"$CATALOG_NAME\",
+#                \"schema_name\": \"$SCHEMA_NAME\"
+#              }
+#            }
+#          }]
+ #       }"
 
-#    - name: Check logs
-#      run: cat ~/.dbsqlcli/app.log
