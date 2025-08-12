@@ -42,7 +42,8 @@ BEGIN
     SET catl = :catalog_name;
     SET schm = :schema_name;
 
-    TestLoop: FOR row AS SELECT TestCaseId, TestNotes, concat(current_catalog(), '.', current_schema(), '.', TestSQL), ExpectedResult ORDER BY TestCaseId DO
+    TestLoop: FOR row AS
+        SELECT TestCaseId, TestNotes, concat(current_catalog(), '.', current_schema(), '.', TestSQL) AS TestSQL, ExpectedResult FROM test_udf_inputs ORDER BY TestCaseId DO
       SET SQLTx = 'INSERT INTO test_udf_outputs SELECT '||
           'CURRENT_TIMESTAMP AS RunTs, '||
           '"'||row.TestCaseId||'", '||
