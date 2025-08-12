@@ -39,8 +39,8 @@ BEGIN
     DECLARE schm STRING;
     DECLARE SQLTx STRING DEFAULT '';
 
-    SET catl = getArgument("catalog_name");
-    SET schm = getArgument("schema_name");
+    SET catl = :catalog_name;
+    SET schm = :schema_name;
 
     TestLoop: FOR row AS
         SELECT TestCaseId, TestNotes, concat(catalog_name, '.', schema_name, '.', TestSQL), ExpectedResult

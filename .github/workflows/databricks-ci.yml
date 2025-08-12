@@ -97,23 +97,23 @@ jobs:
 #    - name: What is remote
 #      run: databricks volumes list workspace funlib
 
-    - name: Submit UDF Registration Inline
-      run: |
-        databricks jobs submit --json "{
-          \"run_name\": \"CI Notebook UDF Registration\",
-          \"tasks\": [{
-            \"task_key\": \"Launch_Reg_Notebook\",
-            \"notebook_task\": {
-              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
-              \"warehouse_id\": \"$WAREHOUSE_ID\",
-              \"base_parameters\": {
-                \"env\": \"ci\",
-                \"catalog_name\": \"$CATALOG_NAME\",
-                \"schema_name\": \"$SCHEMA_NAME\"
-              }
-            }
-          }]
-        }"
+#    - name: Submit UDF Registration Inline
+#      run: |
+#        databricks jobs submit --json "{
+#          \"run_name\": \"CI Notebook UDF Registration\",
+#          \"tasks\": [{
+#            \"task_key\": \"Launch_Reg_Notebook\",
+#            \"notebook_task\": {
+#              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/register_udfs\",
+#              \"warehouse_id\": \"$WAREHOUSE_ID\",
+#              \"base_parameters\": {
+#                \"env\": \"ci\",
+#                \"catalog_name\": \"$CATALOG_NAME\",
+#                \"schema_name\": \"$SCHEMA_NAME\"
+#              }
+#            }
+#          }]
+#        }"
 
     - name: Submit UDF Testing Inline
       run: |
