@@ -43,6 +43,8 @@ def validate_period_array(period: List[str]) -> PeriodInfo:
                         raise ValueError(ERRMSG[ERR_INVALID_DTTM])
             else:
                 raise ValueError(ERRMSG[ERR_INVALID_FORMAT])
+        if end_str is not None and len(start_str) != len(end_str):
+            raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
     else:
         raise ValueError(ERRMSG[ERR_ARRAY_LEN])
 
