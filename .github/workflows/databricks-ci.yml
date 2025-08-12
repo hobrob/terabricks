@@ -76,8 +76,8 @@ jobs:
 #        databricks fs mkdir "/Users/robert.price@rpdw.co.uk/temp"
 #        databricks fs cp "temporals/temp/register_udfs.sql" "/Users/robert.price@rpdw.co.uk/temp/" --overwrite
 
-#    - name: Sync databricks repo folders
-#      run: databricks repos update $WORKSPACE_REPO_ID --branch main
+    - name: Sync databricks repo folders
+      run: databricks repos update $WORKSPACE_REPO_ID --branch main
 
 #    - name: Help
 #      run: databricks volumes --help
