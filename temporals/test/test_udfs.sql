@@ -35,12 +35,17 @@ WHERE FALSE;
 
 BEGIN
 
+    DECLARE catl STRING;
+    DECLARE schm STRING;
     DECLARE SQLTx STRING DEFAULT '';
 
+    SET catl = getArgument("catalog_name");
+    SET schm = getArgument("schema_name");
+
     TestLoop: FOR row AS
-        SELECT TestCaseId, TestNotes, catalog_name||'.'||schema_name||'.'||TestSQL, ExpectedResult
+        SELECT TestCaseId, TestNotes, concat(catalog_name, '.', schema_name, '.', TestSQL), ExpectedResult
         FROM test_udf_inputs
-          CROSS JOIN (SELECT :catalog_name as catalog_name, :schema_name as schema_name)
+          CROSS JOIN (SELECT catl as catalog_name, schm as schema_name)
         ORDER BY TestCaseId DO
       SET SQLTx = 'INSERT INTO test_udf_outputs SELECT '||
           'CURRENT_TIMESTAMP AS RunTs, '||
