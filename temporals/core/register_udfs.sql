@@ -350,11 +350,11 @@ ENVIRONMENT (
 AS $$
 
     import math
-    from datetime import timedelta
+    from datetime import datetime, timedelta
 
     from temporals.core.validators import validate_instant_string
     from temporals.core.utils import is_max_dttm
-    from temporals.core.constants import ERRMSG, ERR_UNKNOWN, DATE, TIME, TIMESTAMP
+    from temporals.core.constants import ERRMSG, ERR_MAX_DATE, ERR_UNKNOWN, DATE, TIME, TIMESTAMP
 
     if instant is None:
         return None
@@ -401,11 +401,11 @@ ENVIRONMENT (
 AS $$
 
     import math
-    from datetime import timedelta
+    from datetime import datetime, timedelta
 
     from temporals.core.validators import validate_instant_string
     from temporals.core.utils import is_min_dttm
-    from temporals.core.constants import ERRMSG, ERR_UNKNOWN, DATE, TIME, TIMESTAMP
+    from temporals.core.constants import ERRMSG, ERR_MIN_DATE, ERR_UNKNOWN, DATE, TIME, TIMESTAMP
 
     if instant is None:
         return None
@@ -452,7 +452,7 @@ ENVIRONMENT (
 AS $$
 
     import math
-    from datetime import timedelta
+    from datetime import datetime, timedelta
 
     from temporals.core.validators import validate_period_array, validate_instant_string
     from temporals.core.utils import is_max_dttm

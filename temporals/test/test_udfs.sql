@@ -37,7 +37,11 @@ BEGIN
 
     DECLARE SQLTx STRING DEFAULT '';
 
-    TestLoop: FOR row AS SELECT TestCaseId, TestNotes, TestSQL, ExpectedResult FROM test_udf_inputs ORDER BY TestCaseId DO
+    TestLoop: FOR row AS
+        SELECT TestCaseId, TestNotes, catalog_name||'.'||schema_name||'.'||TestSQL, ExpectedResult
+        FROM test_udf_inputs
+          CROSS JOIN (SELECT :catalog_name as catalog_name, :schema_name as schema_name)
+        ORDER BY TestCaseId DO
       SET SQLTx = 'INSERT INTO test_udf_outputs SELECT '||
           'CURRENT_TIMESTAMP AS RunTs, '||
           '"'||row.TestCaseId||'", '||

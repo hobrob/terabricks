@@ -20,7 +20,7 @@ def validate_period_array(period: List[str]) -> PeriodInfo:
         for dttm_code in (DT, TM, TS):
             regex = TEMPRL[dttm_code]["regex"]
             if re.match(regex, start_str) and (end_str is None or re.match(regex, end_str)):
-                if len(start_str) != len(end_str):
+                if end_str is not None and len(start_str) != len(end_str):
                     raise ValueError(ERRMSG[ERR_PRECISION_MISMATCH])
                 try:
                     start_ts = cast_str_to_dttm(start_str, dttm_code)
