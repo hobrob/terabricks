@@ -89,7 +89,7 @@ AS $$
     if validPeriod1 and validPeriod2:
         if validPeriod1.dttm_type != validPeriod2.dttm_type:
             raise ValueError(ERRMSG[ERR_TYPE_MISMATCH])
-        return validPeriod1.start_ts <= validPeriod1.start_ts and validPeriod1.end_ts >= validPeriod1.end_ts
+        return validPeriod1.start_ts <= validPeriod2.start_ts and validPeriod1.end_ts >= validPeriod2.end_ts
     raise RuntimeError(ERRMSG[ERR_UNKNOWN])
 
 $$;
@@ -289,7 +289,7 @@ AS $$
     validPeriod1 = validate_period_array(period1)
     validPeriod2 = validate_period_array(period2)
     if validPeriod1 and validPeriod2:
-        return validPeriod1.start_ts <= validPeriod2.end_ts and validPeriod2.start_ts < validPeriod1.end_ts and validPeriod2.end_ts <= validPeriod1.end_ts
+        return validPeriod1.start_ts <= validPeriod2.end_ts and validPeriod1.start_ts > validPeriod2.start_ts and validPeriod1.end_ts <= validPeriod1.end_ts
     raise RuntimeError(ERRMSG[ERR_UNKNOWN])
 
   $$;
@@ -323,7 +323,7 @@ AS $$
     validPeriod1 = validate_period_array(period1)
     validPeriod2 = validate_period_array(period2)
     if validPeriod1 and validPeriod2:
-        return validPeriod1.start_ts <= validPeriod2.end_ts and validPeriod2.start_ts < validPeriod1.end_ts and validPeriod2.start_ts >= validPeriod1.start_ts
+        return validPeriod1.end_ts > validPeriod2.start_ts and validPeriod1.end_ts < validPeriod2.end_ts and validPeriod1.start_ts <= validPeriod2.start_ts
     raise RuntimeError(ERRMSG[ERR_UNKNOWN])
 
   $$;
