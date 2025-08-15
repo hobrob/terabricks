@@ -4,18 +4,26 @@
 
 The [Teradata](https://www.teradata.com/) data warehouse platform implements a composite data type known as a [Period](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Data-Types/Data-Types-and-Literals/Period-Data-Types) that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 slowly changing dimension (SCD) data structures.
 
-Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) that simplify the sometimes complex interplay of predicates required to make sense of data over time, and does so in the verbose and intuitive style that is typical of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
+Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) for working with periods that simplify the sometimes complex interplay of predicates required to make sense of data as it changes over time, and does so in the verbose and intuitive style that is typical of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
 
 ### Table of Contents
-🚀 [1.Getting Started](#001)<br /> 
+🚀 [1.Getting Started](#001)<br />
+&emsp;⚙ [1.1.Option 1: Manual Deployment](#001_001)<br /> 
+&emsp;⚙ [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
+&emsp;🧱 [1.3.Valid Period Formats](#001_003)<br />
 🌐 [2.Overview](#overview)<br />
 ⚠️[3.Differences and Limitations](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
 🛣️️ [6.Roadmap](#006)
 
+---
+
 <a id="001"></a>
 ## 🚀 1. Getting Started
+
+<a id="001_002"></a>
+### ⚙️ Option 1. Manual Deployment
 
 For those who want to dive right in follow these steps to install and register the temporals UDFs in your Databricks workspace. Read on further below for more context and reference material.
 
@@ -77,23 +85,62 @@ For those who want to dive right in follow these steps to install and register t
     Run a test SQL query in Databricks SQL Editor or from an SQL notebook cell.
     ```SQL
     SELECT P_Intersect(array('2025-05-01', '2025-07-01'), array('2025-06-01', '2025-08-01'));
+    ```
+---
+
+<a id="001_002"></a>
+### ⚙️ 1.2 Option 2. CI/CD Automated GitHub Workflow
+
+For teams using GitHub Actions, deployment can be fully automated via the provided `databricks-ci.yml` workflow. This approach eliminates manual steps and ensures reproducible UDF registration across environments.
+
+#### 🧰 Prerequisites
+
+Before triggering the workflow, link your repo with Databricks UI by creating a Git folder and ensure the following GitHub secrets are configured in your repository:
+
+| Secret Name             | Description                                                                                                                                          |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DATABRICKS_HOST`       | Your Databricks workspace URL (e.g. `https://dbc-1234abcd-5678.cloud.databricks.com`)                                                                |
+| `DATABRICKS_TOKEN`      | Personal access token with workspace and volume write permissions (e.g.`dapi1234567890abcdef1234567890abcdef`)                                       |
+| `WAREHOUSE_ID`          | An 8-byte hex string found in parentheses under the Name attribute in the SQL Warehouse Overview tab. (e.g.`1234567890abcdef`)                       |
+| `WORKSPACE_REPO_ID`     | 16 digit numeric id found by clicking the branch name next to the git folder in workspace view, and go to the settings tab (e.g.`1234567890123456`)  |
+| `WORKSPACE_USER_PATH`   | Your Databricks user home workspace path (e.g. `/Users/yo.ur@emailaddy.com`)                                                                         |
+| `WORKSPACE_VOLUME_PATH` | The name of a volume path to host the python wheel and test data (e.g. `dbfs:/Volumes/my_workspace/my_schema/my_volume/volume_subdir`)               |
+| `CATALOG_NAME`          | Target Unity Catalog name                                                                                                                            |
+| `SCHEMA_NAME`           | Target schema within the catalog                                                                                                                     |
+
+#### 🚀 Triggering the Workflow
+
+To deploy the UDFs via CI:
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/hobrob/terabricks
    ```
-   
-7. **Valid formats for defining periods**<br />
+2. **Push a commit to main**
+   The workflow is triggered on push to the main branch. You can also force a run manually via the GitHub UI.
+3. **Optional: Skip testing**
+   The automated SQL testing module can take some time on smaller clusters, add [skip testsql] to the commit message to avoid this overhead.
+
+---
+
+<a id="001_003"></a>
+### 🧱️ 1.3.Valid Period Formats
    Define period types that can be operated on by the function set by constructing a two-element array with strings that conform to one of the following three date, time or timestamp formats.
    ```sql
    '2025-06-01' -- date
    '12:34:56.789' -- time with optional second precision up to 6 decimal places
    '2025-06-01 12:34:56.789' -- timestamp with optional second precision up to 6 decimal places
    ```
-   Both elements of the array must take the same format, mixed types will cause the UDFs to throw an error. They must cast to a valid date and / or time and the second element must be at least one unit grain of time greater than the first. Additional elements of the array can be populated if so desired. 
+   Both elements of the array must take the same format, mixed types and precisions will cause the UDFs to throw an error. They must cast to a valid date and / or time and the second element must be at least one unit grain of time greater than the first. Additional elements of the array can be populated if so desired. 
    ```sql
-   array('2025-06-01', '2025-06-02 12:34:56') -- ❌ invalid, mixing two different types
+   array('2025-06-01', '2025-06-02 12:34:56') -- ❌ invalid, mixing different types
+   array('12:34:56.7', '12:34:56.789') -- ❌ invalid, mixing different precision
    array('2025-06-01', '2025-06-32') -- ❌ invalid, impossible date
    array('2025-06-01', '2025-06-01') -- ❌ invalid, upper bound is not greater than the lower bound
    array('2025-06-01', '2025-06-08') -- ✅ valid 7 day period
    array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
    ```
+---
 
 <a id="overview"></a>
 ## 🌐 2. Overview
@@ -107,6 +154,8 @@ The set of functions and operators that accompany the period data type have been
 - Sequencing - Compare two periods or points in time and return boolean values indicating their presence in relation to one another, such as Precedes() which returns true if a period occurs before another.
 - Set operations - These return a period object based on a set operation carried out on two periods, such as P_Intersect, that returns a period representing the overlap between two periods. 
 - Table functions - These can be used in the context of an SQL from clause to expand period types row-wise into table-like structures. These are currently out of scope of this project but may be explored in the future.   
+
+---
 
 <a id="003"></a>
 ## ⚠️ 3. Differences and Limitations
@@ -129,6 +178,8 @@ Time and timestamp types in Teradata have strongly typed precision whereas Datab
 
 The Terabricks set of UDFs in the MVP version are not currently timezone aware. Any timezone related calculations should be handled outside of the UDFs, or wait until the next version of Terabricks.
 
+---
+
 <a id="004"></a>
 ## 🧩 4. Extensions
 
@@ -138,6 +189,8 @@ The full set of informational, sequencing, and set operation functions and opera
 - **OverlapsLeft(p1, p2) -** This extends the Overlaps function with situational awareness, tests whether p1 overlaps p2 where a portion of p1 occurs before the start of p2.
 - **OverlapsRight(p1, p2) -** Similar to OverlapsLeft but tests whether p1 overlaps p2 where a portion of p1 occurs after the end of p2.
 - **P_Intermediate(p1, p2) -** If p1 and p2 do not overlap and are not immediately adjacent, this returns a period that represents the gap between p1 and p2
+
+---
 
 <a id="005"></a>
 ## 🧮 5. Table of Functions and Operators
@@ -182,6 +235,8 @@ In the following table the placeholders p, p1, and p2 represent periods and t re
 | Set operations | p1 RDIFF p2                  | RDiff(p1, p2)                             | PERIOD                    |                                                                                                                               |
 | Set operations | p1 P_INTERSECT p2            | P_Intersect(p1, p2)                       | PERIOD                    |                                                                                                                               |
 | Set operations | n/a                          | P_Intermediate(p1, p2)                    | PERIOD                    |                                                                                                                               |
+
+---
 
 <a id="006"></a>
 ## 🛣️️ 6. Roadmap
