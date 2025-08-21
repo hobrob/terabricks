@@ -12,7 +12,7 @@ Alongside the period type, it also offers a mature set of [functions and operato
 &emsp;⚙ [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
 &emsp;🧱 [1.3.Valid Period Formats](#001_003)<br />
 🌐 [2.Overview](#overview)<br />
-⚠️[3.Type Handling, Precision, and Behavioral Difference](#003)<br /> 
+⚠️[3.Type Handling, Precision, and Behavioral Differences](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
 🛣️️ [6.Roadmap](#006)
@@ -161,7 +161,7 @@ The set of functions and operators that accompany the period data type have been
 ---
 
 <a id="003"></a>
-## ⚠️ 3. Type Handling, Precision, and Behavioral Difference
+## ⚠️ 3. Type Handling, Precision, and Behavioral Differences
 
 #### Data Types
 
