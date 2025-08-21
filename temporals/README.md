@@ -4,7 +4,7 @@
 
 The [Teradata](https://www.teradata.com/) data warehouse platform implements a composite data type known as a [Period](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Data-Types/Data-Types-and-Literals/Period-Data-Types) that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 slowly changing dimension (SCD) data structures.
 
-Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) for working with periods that simplify the sometimes complex interplay of predicates required to make sense of data as it changes over time, and does so in the verbose and intuitive style that is typical of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
+Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) for working with periods that simplify the sometimes complex interplay of predicates required to make sense of data as it changes over time, and does so in the verbose and intuitive style that is characteristic of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
 
 ### Table of Contents
 🚀 [1.Getting Started](#001)<br />
@@ -12,7 +12,7 @@ Alongside the period type, it also offers a mature set of [functions and operato
 &emsp;⚙ [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
 &emsp;🧱 [1.3.Valid Period Formats](#001_003)<br />
 🌐 [2.Overview](#overview)<br />
-⚠️[3.Differences and Limitations](#003)<br /> 
+⚠️[3.Type Handling, Precision, and Behavioral Difference](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
 🛣️️ [6.Roadmap](#006)
@@ -26,6 +26,9 @@ Alongside the period type, it also offers a mature set of [functions and operato
 ### ⚙️ Option 1. Manual Deployment
 
 For those who want to dive right in follow these steps to install and register the temporals UDFs in your Databricks workspace. Read on further below for more context and reference material.
+<br /><br />
+replace the text between angled brackets <> with values that are applicable to your environment.  
+
 
 1. **Clone the repository**
    ```bash
@@ -40,7 +43,7 @@ For those who want to dive right in follow these steps to install and register t
    ```
    
 3. **Upload the wheel to Unity Catalog**<br />
-   Choose a target volume to host the wheel package and upload via the Unity Catalog UI, or from a python notebook cell:-
+   Choose or create a target volume to host the wheel package and upload via the Unity Catalog UI, or from a python notebook cell:-
    ```bash
     dbutils.fs.cp("file:dist/terabricks_temporals-0.0.1-py3-none-any.whl", "dbfs:/Volumes/<catalog>/<schema>/<volume>/")
    ```
@@ -54,7 +57,7 @@ For those who want to dive right in follow these steps to install and register t
    ```bash
    sed -i "s|__VOLUME__|/Volumes/<catalog>/<schema>/<volume>|g;s|__WHEEL__|terabricks_temporals-0.0.1-py3-none-any.whl|g" temporals/core/register_udfs.sql
    ```
-   Upload to Databricks using the workspace UI, or a from python notebook cell
+   Upload to Databricks using the workspace UI, or from a python notebook cell
    ```bash
    dbutils.fs.cp("file:temporals/core/register_udfs.sql", "<workspace folder>")
    ```
@@ -158,7 +161,7 @@ The set of functions and operators that accompany the period data type have been
 ---
 
 <a id="003"></a>
-## ⚠️ 3. Differences and Limitations
+## ⚠️ 3. Type Handling, Precision, and Behavioral Difference
 
 #### Data Types
 
