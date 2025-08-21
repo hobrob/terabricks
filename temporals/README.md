@@ -249,4 +249,4 @@ This is a wishlist of things that will be added in future releases on a best end
 - Permissive Precision Handling - Functions that enforce precision parity will be relaxed to allow times and timestamps of varying precision to be compared.
 - Timezone awareness - Period arrays will allow UTC offsets suffixed to time and timestamp values.
 - Table functions - A full interpretation of the set of function prefixed with TD_ is desirable, though may be difficult to implement in Unity Catalog due to a limitation whereby only scalar UDFs are allowed.  
-
+- Optimize period array validation - Introduce a constructor function that embeds a validation watermark or checksum into period arrays. This will reduce redundant format checks across UDF calls and improve runtime efficiency while preserving data integrity.
