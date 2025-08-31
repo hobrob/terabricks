@@ -8,9 +8,10 @@ Alongside the period type, it also offers a mature set of [functions and operato
 
 ### Table of Contents
 🚀 [1.Getting Started](#001)<br />
-&emsp;⚙ [1.1.Option 1: Manual Deployment](#001_001)<br /> 
-&emsp;⚙ [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
-&emsp;🧱 [1.3.Valid Period Formats](#001_003)<br />
+&emsp;&emsp; [1.1.Option 1: Manual Deployment](#001_001)<br /> 
+&emsp;&emsp; [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
+&emsp;&emsp; [1.3.Valid Period Formats](#001_003)<br />
+&emsp;&emsp; [1.4.Examples](#001_004)<br />
 🌐 [2.Overview](#overview)<br />
 ⚠️[3.Type Handling, Precision, and Behavioral Differences](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
@@ -22,12 +23,12 @@ Alongside the period type, it also offers a mature set of [functions and operato
 <a id="001"></a>
 ## 🚀 1. Getting Started
 
-<a id="001_002"></a>
-### ⚙️ Option 1. Manual Deployment
+<a id="001_001"></a>
+### 1.1. Option 1: Manual Deployment
 
 For those who want to dive right in follow these steps to install and register the temporals UDFs in your Databricks workspace. Read on further below for more context and reference material.
 <br /><br />
-replace the text between angled brackets <> with values that are applicable to your environment.  
+Replace the text between angled brackets <> with values that are applicable to your environment.  
 
 
 1. **Clone the repository**
@@ -92,11 +93,11 @@ replace the text between angled brackets <> with values that are applicable to y
 ---
 
 <a id="001_002"></a>
-### ⚙️ 1.2 Option 2. CI/CD Automated GitHub Workflow
+### 1.2. Option 2: CI/CD Automated GitHub Workflow
 
 For teams using GitHub Actions, deployment can be fully automated via the provided `databricks-ci.yml` workflow. This approach eliminates manual steps and ensures reproducible UDF registration across environments.
 
-#### 🧰 Prerequisites
+#### Prerequisites
 
 Before triggering the workflow, link your repo with Databricks UI by creating a Git folder and ensure the following GitHub secrets are configured in your repository:
 
@@ -111,7 +112,7 @@ Before triggering the workflow, link your repo with Databricks UI by creating a 
 | `CATALOG_NAME`          | Target Unity Catalog name                                                                                                                            |
 | `SCHEMA_NAME`           | Target schema within the catalog                                                                                                                     |
 
-#### 🚀 Triggering the Workflow
+#### Triggering the Workflow
 
 To deploy the UDFs via CI:
 
@@ -127,7 +128,7 @@ To deploy the UDFs via CI:
 ---
 
 <a id="001_003"></a>
-### 🧱️ 1.3.Valid Period Formats
+### 1.3. Valid Period Formats
    Define period types that can be operated on by the function set by constructing a two-element array with strings that conform to one of the following three date, time or timestamp formats.
    ```sql
    '2025-06-01' -- date
@@ -143,16 +144,52 @@ To deploy the UDFs via CI:
    array('2025-06-01', '2025-06-08') -- ✅ valid 7 day period
    array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
    ```
+
+---
+
+<a id="001_004"></a>
+### 1.4. Examples
+   Validate and inspect the bounds of period types, get values adjacent to an instant. Check for high value end dates and get the duration in a variety of measures.
+   ```sql
+SELECT 
+        array('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
+        IsPeriod(p), Begin(p), End(p), Prior(t);
+
+SELECT 
+        array('2025-01-01', '2025-12-31') AS p, 
+        IsUntilChanged(p), IntervalD(p), IntervalH(p);
+   ```
+   Check if an instant falls within a period or meets its bounds. Check if two periods overlap, meet, or if one precedes the other.
+   ```sql
+SELECT 
+        array('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
+        Contains(p, t), Meets(p, t);
+
+SELECT 
+        array('2024-01-01', '2024-07-01') AS p1, array('2024-07-01', '2024-12-31') as p2,
+        Overlaps(p1, p2), MeetsPeriod(p1, p2), Precedes(p1, p2);
+   ```
+   Return a period that represents the overlap between two periods, or the gap between two periods.
+   ```sql
+SELECT 
+        array('2024-01-01', '2024-09-01') AS p1, array('2024-07-01', '2024-12-31') as p2, array('2025-03-01', '2025-12-31') as p3,
+        P_Intersect(p1, p2), P_Intermediate(p2, p3);
+   ```
 ---
 
 <a id="overview"></a>
 ## 🌐 2. Overview
 
-Teradata period types are a composite type consisting of two homogenously-typed date, time, or timestamp values that sit within a single field, representing an inclusive lower bound and an exclusive upper bound. In other words the timescale represented by the pair of values spans from the lower bound to a single unit grain of time before the upper bound.
+- Period types are a composite type consisting of two homogenously-typed date, time, or timestamp values.
+- Hold an inclusive lower bound and exclusive upper bound.
+- Sentinel “end” value for dates is 9999-12-31, for times 23:59:59.999999, and for timestamps it is the composite of these two values.
+- Created using the `PERIOD()` constructor function.
 
-Data structures where the validity of a row is determined by start and end dates and / or times often use a convention where the end date is assigned the highest possible value. For dates this is 9999-12-31, for times this is 23:59:59.999999, and for timestamps it is the composite of these two values. In Teradata this value is represented by the constant UNTIL_CHANGED.
-
-The set of functions and operators that accompany the period data type have been broadly categorised into four areas:
+```sql
+-- create a date, time, and timestamp-ranged period
+- SELECT PERIOD('2025-01-01', '2026-01-01'), PERIOD('13:50:00.00', '14:10:00.00'), PERIOD('2025-01-01 13:50:00.00', '2026-01-01 14:10:00.00');
+```
+The set of functions and operators that accompany the period data type can be broadly categorised into four areas:
 - Informational - return information about the type such as the beginning or end bound, or the duration.
 - Sequencing - Compare two periods or points in time and return boolean values indicating their presence in relation to one another, such as Precedes() which returns true if a period occurs before another.
 - Set operations - These return a period object based on a set operation carried out on two periods, such as P_Intersect, that returns a period representing the overlap between two periods. 
@@ -186,13 +223,15 @@ The Terabricks set of UDFs in the MVP version are not currently timezone aware. 
 <a id="004"></a>
 ## 🧩 4. Extensions
 
-The full set of informational, sequencing, and set operation functions and operators have all been replicated in some form or another, but some additional functions are also provided to extend the functionality available in Teradata.
-- **IsPeriod(p) -** This simply tests an array p to confirm if it adheres to the format required to be passed in to the UDFs.
-- **Consumes(p1, p2) -** This tests whether the period p1 is at least equal to or fully engulfs period p2
-- **OverlapsLeft(p1, p2) -** This extends the Overlaps function with situational awareness, tests whether p1 overlaps p2 where a portion of p1 occurs before the start of p2.
-- **OverlapsRight(p1, p2) -** Similar to OverlapsLeft but tests whether p1 overlaps p2 where a portion of p1 occurs after the end of p2.
-- **P_Intermediate(p1, p2) -** If p1 and p2 do not overlap and are not immediately adjacent, this returns a period that represents the gap between p1 and p2
+The full set of informational, sequencing, and set operation functions and operators have all been replicated in some form or another, but some additional functions are also provided to extend the functionality available in Teradata.<br />
 
+| Function                  | Description                                                                 |
+|---------------------------|-----------------------------------------------------------------------------|
+| `IsPeriod(p)`             | Tests whether array `p` conforms to the format required by the UDFs.        |
+| `Consumes(p1, p2)`        | Checks if `p1` is at least equal to or fully engulfs `p2`.                  |
+| `OverlapsLeft(p1, p2)`    | Tests if `p1` overlaps `p2` with a portion of `p1` occurring before `p2`.   |
+| `OverlapsRight(p1, p2)`   | Tests if `p1` overlaps `p2` with a portion of `p1` occurring after `p2`.    |
+| `P_Intermediate(p1, p2)`  | Returns the gap period between `p1` and `p2` if they don’t overlap or touch.|
 ---
 
 <a id="005"></a>
@@ -200,44 +239,45 @@ The full set of informational, sequencing, and set operation functions and opera
 
 In the following table the placeholders p, p1, and p2 represent periods and t represents point-in-time instants. For the Terabricks equivalent UDFs, where a return type of DATE/TIME/TIMESTAMP is given this actually equates to an ISO 8601 compliant string, and PERIOD equates to a two-element array of ISO 8601 compliant strings. 
 
-| Category       | Teradata Usage               | Terabricks Usage                          | Return Type               | Notes                                                                                                                         |
-|----------------|------------------------------|-------------------------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| Informational  | n/a                          | IsPeriod(p)                               | BOOLEAN                   |                                                                                                                               |
-| Informational  | BEGIN(p)                     | Begin(p)                                  | DATE/TIME/TIMESTAMP       |                                                                                                                               |
-| Informational  | END(p)                       | End(p)                                    | DATE/TIME/TIMESTAMP       |                                                                                                                               |
-| Informational  | LAST(p)                      | Last(p)                                   | DATE/TIME/TIMESTAMP       |                                                                                                                               |
-| Informational  | NEXT(t)                      | Next(t)                                   | DATE/TIME/TIMESTAMP       |                                                                                                                               |
-| Informational  | PRIOR(t)                     | Prior(t)                                  | DATE/TIME/TIMESTAMP       |                                                                                                                               |
-| Informational  | INTERVAL(p) YEAR             | IntervalYear(p), IntervalY(p)             | INTERVAL YEAR             |                                                                                                                               |
-| Informational  | INTERVAL(p) YEAR TO MONTH    | IntervalYearToMonth(p), IntervalY2M(p)    | INTERVAL YEAR TO MONTH    |                                                                                                                               |
-| Informational  | INTERVAL(p) MONTH            | IntervalMonth(p), IntervalMo(p)           | INTERVAL MONTH            |                                                                                                                               |
-| Informational  | INTERVAL(p) DAY              | IntervalDay(p), IntervalD(p)              | INTERVAL DAY              |                                                                                                                               |
-| Informational  | INTERVAL(p) DAY TO HOUR      | IntervalDayToHour(p), IntervalD2H(p)      | INTERVAL DAY TO HOUR      |                                                                                                                               |
-| Informational  | INTERVAL(p) DAY TO MINUTE    | IntervalDayToMinute(p), IntervalD2M(p)    | INTERVAL DAY TO MINUTE    |                                                                                                                               |
-| Informational  | INTERVAL(p) DAY TO SECOND    | IntervalDayToSecond(p), IntervalD2S(p)    | INTERVAL DAY TO SECOND    |                                                                                                                               |
-| Informational  | INTERVAL(p) HOUR             | IntervalHour(p), IntervalH(p)             | INTERVAL HOUR             |                                                                                                                               |
-| Informational  | INTERVAL(p) HOUR TO MINUTE   | IntervalHourToMinute(p), IntervalH2M(p)   | INTERVAL HOUR TO MINUTE   |                                                                                                                               |
-| Informational  | INTERVAL(p) HOUR TO SECOND   | IntervalHourToSecond(p), IntervalH2S(p)   | INTERVAL HOUR TO SECOND   |                                                                                                                               |
-| Informational  | INTERVAL(p) MINUTE           | IntervalMinute(p), IntervalMi(p)          | INTERVAL MINUTE           |                                                                                                                               |
-| Informational  | INTERVAL(p) MINUTE TO SECOND | IntervalMinuteToSecond(p), IntervalM2S(p) | INTERVAL MINUTE TO SECOND |                                                                                                                               |
-| Informational  | INTERVAL(p) SECOND           | IntervalSecond(p), IntervalS(p)           | INTERVAL SECOND           |                                                                                                                               || Informational  | IS UNTIL_CHANGED           | IsUntilChanged(p)                         | BOOLEAN                   |                                                                                                                                    |
-| Informational  | IS NOT UNTIL_CHANGED         | n/a                                       | BOOLEAN                   | Use IsUntilChanged() with a negation operator                                                                                 |
-| Sequencing     | n/a                          | Consumes(p1, p2)                          | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p CONTAINS t                 | Contains(p, t)                            | BOOLEAN                   | Must be qualified with a schema name to avoid conflict with its namesake built-in function                                    |
-| Sequencing     | p1 EQUALS p2                 | Equals(p1, p2)                            | BOOLEAN                   | The equality operator (=) achieves the same outcome for far fewer keystrokes, but the UDF is still included for completeness. |
-| Sequencing     | p1 OVERLAPS p2               | Overlaps(p1, p2)                          | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | n/a                          | OverlapsLeft(p1, p2)                      | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | n/a                          | OverlapsRight(p1, p2)                     | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p MEETS t                    | MeetsInstant(p, t)                        | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p1 MEETS p2                  | MeetsPeriod(p1, p2)                       | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p1 PRECEDES p2               | Precedes(p1, p2)                          | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p1 IMMEDIATELY PRECEDES p2   | ImmediatelyPrecedes(p1, p2)               | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p1 SUCCEEDS p2               | Succeeds(p1, p2)                          | BOOLEAN                   |                                                                                                                               |
-| Sequencing     | p1 IMMEDIATELY SUCCEEDS p2   | ImmediatelySucceeds(p1, p2)               | BOOLEAN                   |                                                                                                                               |
-| Set operations | p1 LDIFF p2                  | LDiff(p1, p2)                             | PERIOD                    |                                                                                                                               |
-| Set operations | p1 RDIFF p2                  | RDiff(p1, p2)                             | PERIOD                    |                                                                                                                               |
-| Set operations | p1 P_INTERSECT p2            | P_Intersect(p1, p2)                       | PERIOD                    |                                                                                                                               |
-| Set operations | n/a                          | P_Intermediate(p1, p2)                    | PERIOD                    |                                                                                                                               |
+| Category       | Teradata Usage                 | Terabricks Usage                              | Return Type               | Notes                                                                                                                         |
+|----------------|--------------------------------|-----------------------------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| Informational  | n/a                            | `IsPeriod(p)`                                 | BOOLEAN                   |                                                                                                                               |
+| Informational  | `BEGIN(p)`                     | `Begin(p)`                                    | DATE/TIME/TIMESTAMP       |                                                                                                                               |
+| Informational  | `END(p)`                       | `End(p)`                                      | DATE/TIME/TIMESTAMP       |                                                                                                                               |
+| Informational  | `LAST(p)`                      | `Last(p)`                                     | DATE/TIME/TIMESTAMP       |                                                                                                                               |
+| Informational  | `NEXT(t)`                      | `Next(t)`                                     | DATE/TIME/TIMESTAMP       |                                                                                                                               |
+| Informational  | `PRIOR(t)`                     | `Prior(t)`                                    | DATE/TIME/TIMESTAMP       |                                                                                                                               |
+| Informational  | `INTERVAL(p) YEAR`             | `IntervalYear(p)`, `IntervalY(p)`             | INTERVAL YEAR             |                                                                                                                               |
+| Informational  | `INTERVAL(p) YEAR TO MONTH`    | `IntervalYearToMonth(p)`, `IntervalY2M(p)`    | INTERVAL YEAR TO MONTH    |                                                                                                                               |
+| Informational  | `INTERVAL(p) MONTH`            | `IntervalMonth(p)`, `IntervalMo(p)`           | INTERVAL MONTH            |                                                                                                                               |
+| Informational  | `INTERVAL(p) DAY`              | `IntervalDay(p)`, `IntervalD(p)`              | INTERVAL DAY              |                                                                                                                               |
+| Informational  | `INTERVAL(p) DAY TO HOUR`      | `IntervalDayToHour(p)`, `IntervalD2H(p)`      | INTERVAL DAY TO HOUR      |                                                                                                                               |
+| Informational  | `INTERVAL(p) DAY TO MINUTE`    | `IntervalDayToMinute(p)`, `IntervalD2M(p)`    | INTERVAL DAY TO MINUTE    |                                                                                                                               |
+| Informational  | `INTERVAL(p) DAY TO SECOND`    | `IntervalDayToSecond(p)`, `IntervalD2S(p)`    | INTERVAL DAY TO SECOND    |                                                                                                                               |
+| Informational  | `INTERVAL(p) HOUR`             | `IntervalHour(p)`, `IntervalH(p)`             | INTERVAL HOUR             |                                                                                                                               |
+| Informational  | `INTERVAL(p) HOUR TO MINUTE`   | `IntervalHourToMinute(p)`, `IntervalH2M(p)`   | INTERVAL HOUR TO MINUTE   |                                                                                                                               |
+| Informational  | `INTERVAL(p) HOUR TO SECOND`   | `IntervalHourToSecond(p)`, `IntervalH2S(p)`   | INTERVAL HOUR TO SECOND   |                                                                                                                               |
+| Informational  | `INTERVAL(p) MINUTE`           | `IntervalMinute(p)`, `IntervalMi(p)`          | INTERVAL MINUTE           |                                                                                                                               |
+| Informational  | `INTERVAL(p) MINUTE TO SECOND` | `IntervalMinuteToSecond(p)`, `IntervalM2S(p)` | INTERVAL MINUTE TO SECOND |                                                                                                                               |
+| Informational  | `INTERVAL(p) SECOND`           | `IntervalSecond(p)`, `IntervalS(p)`           | INTERVAL SECOND           |                                                                                                                               || Informational  | IS UNTIL_CHANGED           | IsUntilChanged(p)                         | BOOLEAN                   |                                                                                                                                    |
+| Informational  | `IS UNTIL_CHANGED`             | `IsUntilChanged(p)`                           | BOOLEAN                   |                                                                                                                               |
+| Informational  | `IS NOT UNTIL_CHANGED`         | n/a                                           | BOOLEAN                   | Use IsUntilChanged() with a negation operator                                                                                 |
+| Sequencing     | n/a                            | `Consumes(p1, p2)`                            | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p CONTAINS t`                 | `Contains(p, t)`                              | BOOLEAN                   | Must be qualified with a schema name to avoid conflict with its namesake built-in function                                    |
+| Sequencing     | `p1 EQUALS p2`                 | `Equals(p1, p2)`                              | BOOLEAN                   | The equality operator (=) achieves the same outcome for far fewer keystrokes, but the UDF is still included for completeness. |
+| Sequencing     | `p1 OVERLAPS p2`               | `Overlaps(p1, p2)`                            | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | n/a                            | `OverlapsLeft(p1, p2)`                        | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | n/a                            | `OverlapsRight(p1, p2)`                       | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p MEETS t`                    | `MeetsInstant(p, t)`                          | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p1 MEETS p2`                  | `MeetsPeriod(p1, p2)`                         | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p1 PRECEDES p2`               | `Precedes(p1, p2)`                            | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p1 IMMEDIATELY PRECEDES p2`   | `ImmediatelyPrecedes(p1, p2)`                 | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p1 SUCCEEDS p2`               | `Succeeds(p1, p2)`                            | BOOLEAN                   |                                                                                                                               |
+| Sequencing     | `p1 IMMEDIATELY SUCCEEDS p2`   | `ImmediatelySucceeds(p1, p2)`                 | BOOLEAN                   |                                                                                                                               |
+| Set operations | `p1 LDIFF p2`                  | `LDiff(p1, p2)`                               | PERIOD                    |                                                                                                                               |
+| Set operations | `p1 RDIFF p2`                  | `RDiff(p1, p2)`                               | PERIOD                    |                                                                                                                               |
+| Set operations | `p1 P_INTERSECT p2`            | `P_Intersect(p1, p2)`                         | PERIOD                    |                                                                                                                               |
+| Set operations | n/a                            | `P_Intermediate(p1, p2)`                      | PERIOD                    |                                                                                                                               |
 
 ---
 
@@ -246,7 +286,9 @@ In the following table the placeholders p, p1, and p2 represent periods and t re
 
 This is a wishlist of things that will be added in future releases on a best endeavours basis.
 
-- Permissive Precision Handling - Functions that enforce precision parity will be relaxed to allow times and timestamps of varying precision to be compared.
-- Timezone awareness - Period arrays will allow UTC offsets suffixed to time and timestamp values.
-- Table functions - A full interpretation of the set of function prefixed with TD_ is desirable, though may be difficult to implement in Unity Catalog due to a limitation whereby only scalar UDFs are allowed.  
-- Optimize period array validation - Introduce a constructor function that embeds a validation watermark or checksum into period arrays. This will reduce redundant format checks across UDF calls and improve runtime efficiency while preserving data integrity.
+- [ ] Permissive Precision Handling - Functions that enforce precision parity will be relaxed to allow times and timestamps of varying precision to be compared.
+- [ ] Timezone awareness - Period arrays will allow UTC offsets suffixed to time and timestamp values.
+- [ ] Table functions - A full interpretation of the set of function prefixed with TD_ is desirable, though may be difficult to implement in Unity Catalog due to a limitation whereby only scalar UDFs are allowed.  
+- [ ] Optimize period array validation - Introduce a constructor function that embeds a validation watermark or checksum into period arrays. This will reduce redundant format checks across UDF calls and improve runtime efficiency while preserving data integrity.
+
+Contributions are welcome, please see [CONTRIBUTIONS.md]() for more info.

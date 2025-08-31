@@ -2,7 +2,7 @@
 import pytest
 from temporals.core.validators import validate_period_array
 from temporals.core.types import PeriodInfo
-from temporals.core.constants import DT, TM, TS, ERRMSG, ERR_ARRAY_LEN, ERR_INVALID_FORMAT, ERR_PRECISION_MISMATCH
+from temporals.core.constants import DT, TM, TS, ERRMSG, ERR_ARRAY_LEN, ERR_INVALID_FORMAT, ERR_PRECISION_MISMATCH, ERR_UBOUND_LE_LBOUND
 
 
 def test_valid_date_period():
@@ -54,3 +54,10 @@ def test_array_too_short():
     with pytest.raises(ValueError) as excinfo:
         validate_period_array(period)
     assert ERRMSG[ERR_ARRAY_LEN] in str(excinfo.value)
+
+
+def test_array_ubound_le_lbound():
+    period = ["2024-01-01", "2024-01-01"]
+    with pytest.raises(ValueError) as excinfo:
+        validate_period_array(period)
+    assert ERRMSG[ERR_UBOUND_LE_LBOUND] in str(excinfo.value)
