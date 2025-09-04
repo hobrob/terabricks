@@ -16,7 +16,8 @@ Alongside the period type, it also offers a mature set of [functions and operato
 ⚠️[3.Type Handling, Precision, and Behavioral Differences](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
-🛣️️ [6.Roadmap](#006)
+🛣️️ [6.Roadmap](#006)<br />
+🙏 [7. Support This Project](#007)
 
 ---
 
@@ -292,3 +293,23 @@ This is a wishlist of things that will be added in future releases on a best end
 - [ ] Optimize period array validation - Introduce a constructor function that embeds a validation watermark or checksum into period arrays. This will reduce redundant format checks across UDF calls and improve runtime efficiency while preserving data integrity.
 
 Contributions are welcome, please see [CONTRIBUTIONS.md]() for more info.
+
+
+## 🙏 7. Support This Project
+
+If you find this project helpful, inspiring, or just plain cool, consider supporting its development. Your contributions help keep the lights on and the ideas flowing.
+
+### Buy Me a Coffee
+You can make a small donation via [BuyMeACoffee](https://www.buymeacoffee.com/yourusername) — every cup fuels more code!
+
+### Crypto Donations
+Prefer crypto? You’re awesome! Here are some wallet addresses:
+
+- **Bitcoin (BTC):** `bc1qszqvuczfj7h26jv57kacwlyqn5z7ptdmnlpdpp`
+- **Litecoin (LTC):** `MGxDKMDwrWLXJxuxjnuPiBnQHkGKXyBpcS`
+- **Ethereum (ETH):** `0xbE9056cB36f741FcB50c1d49b700cDA6dbdc614c`
+
+### Other Ways to Support
+- Share the repo with others who might benefit
+- Star ⭐ the project on GitHub
+- Open an issue or PR to help improve it
