@@ -6,13 +6,14 @@ The [Teradata](https://www.teradata.com/) data warehouse platform implements a c
 
 Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) for working with periods that simplify the sometimes complex interplay of predicates required to make sense of data as it changes over time, and does so in the verbose and intuitive style that is characteristic of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
 
+<a id="000"></a>
 ### Table of Contents
 🚀 [1.Getting Started](#001)<br />
 &emsp;&emsp; [1.1.Option 1: Manual Deployment](#001_001)<br /> 
 &emsp;&emsp; [1.2.Option 2: CI/CD Automated GitHub Workflow](#001_002)<br />
 &emsp;&emsp; [1.3.Valid Period Formats](#001_003)<br />
 &emsp;&emsp; [1.4.Examples](#001_004)<br />
-🌐 [2.Overview](#overview)<br />
+🌐 [2.Overview](#002)<br />
 ⚠️[3.Type Handling, Precision, and Behavioral Differences](#003)<br /> 
 🧩 [4.Extensions](#004)<br />
 🧮 [5.Table of Functions and Operators](#005)<br />
@@ -313,3 +314,6 @@ Prefer crypto? You’re awesome! Here are some wallet addresses:
 - Share the repo with others who might benefit
 - Star ⭐ the project on GitHub
 - Open an issue or PR to help improve it
+
+---
+[Back to top](#000)
