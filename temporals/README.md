@@ -300,7 +300,7 @@ Contributions are welcome, please see [CONTRIBUTIONS.md]() for more info.
 If you find this project helpful, inspiring, or just plain cool, consider supporting its development. Your contributions help keep the lights on and the ideas flowing.
 
 ### Buy Me a Coffee
-You can make a small donation via [BuyMeACoffee](https://www.buymeacoffee.com/yourusername) — every cup fuels more code!
+You can make a small donation via [BuyMeACoffee](https://buymeacoffee.com/hobrob) — every cup fuels more code!
 
 ### Crypto Donations
 Prefer crypto? You’re awesome! Here are some wallet addresses:
