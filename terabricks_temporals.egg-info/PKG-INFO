@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: terabricks-temporals
+Version: 0.0.1
+Summary: Emulating Teradata's period functions and operators on Databricks
+Author-email: Robert Price <robert.price@rpdw.co.uk>
+License-Expression: MIT
+Project-URL: Repository, https://github.com/hobrob/terabricks/tree/main/temporals
+Keywords: Teradata,Databricks,period,temporal,SCD,UDFs
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Database Developers
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Dynamic: license-file
+
+# terabricks
+A project that aims to bring the best of Teradata to Databricks
+
+1. **[Temporals](https://github.com/hobrob/terabricks/edit/main/temporals/README.md)** - A port of Teradata's temporal functions and operators that work with the Period composite data type.
