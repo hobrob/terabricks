@@ -1,0 +1,27 @@
+# Exclude entire docs directory
+*docs/
+*sbox/
+*dist/
+*build/
+
+# Python artifacts
+.pytest_cache/
+*.egg-info
+*.pyc
+*.pyo
+*.pyd
+
+# Environment and config files
+.env
+*.env
+
+# Editor/IDE junk
+*.swp
+*.swo
+*.bak
+.vscode/
+.idea/
+
+# OS-specific cruft
+.DS_Store
+Thumbs.db
