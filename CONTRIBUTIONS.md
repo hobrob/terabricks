@@ -12,10 +12,10 @@ Thanks for your interest in contributing! We welcome pull requests, issues, and 
    
 ### 🛠️ Types of Contributions
 We welcome:
-- 📝 Documentation improvements (clarity, examples, onboarding flow)
+- 📝 Documentation improvements
 - 🐛 Bug fixes
 - 🚀 New features
-- 🧪 Test coverage enhancements
+- 🧪 Test coverage and CI/CD enhancements
 - 📦 Refactoring and performance optimization
 
 ### 📚 Writing Documentation
