@@ -2,7 +2,7 @@
 
 ### Introduction
 
-The [Teradata](https://www.teradata.com/) data warehouse platform implements a composite data type known as a [Period](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Data-Types/Data-Types-and-Literals/Period-Data-Types) that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 slowly changing dimension (SCD) data structures.
+The [Teradata](https://www.teradata.com/) data warehouse platform implements a composite data type known as a [Period](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Data-Types/Data-Types-and-Literals/Period-Data-Types) that consists of two values - a lower and upper bound of date, time, or timestamp types. This lends itself well to representing the validity of data over time as found in type 2, 4 and 6 [slowly changing dimension (SCD)](https://en.wikipedia.org/wiki/Slowly_changing_dimension) data structures.
 
 Alongside the period type, it also offers a mature set of [functions and operators](https://docs.teradata.com/r/Lake-Working-with-SQL/SQL-Functions/SQL-Date-and-Time-Functions-and-Expressions/Period-Functions-and-Operators) for working with periods that simplify the sometimes complex interplay of predicates required to make sense of data as it changes over time, and does so in the verbose and intuitive style that is characteristic of SQL. The [Databricks](https://www.databricks.com/) lakehouse platform has emerged as a modern alternative to traditional data warehousing yet it has no such equivalent, so this project aims to fill that gap with a set of Unity Catalog UDFs authored in Python that replicate and extend much of this capability.  
 
