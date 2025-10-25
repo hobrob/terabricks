@@ -13,7 +13,7 @@ env:
   WORKSPACE_VOLUME_PATH: ${{ secrets.WORKSPACE_VOLUME_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
-  WHEEL_NAME: "terabricks_temporals-0.0.1-py3-none-any.whl"
+  WHEEL_NAME: "terabricks_temporals-1.0.0-py3-none-any.whl"
   TEST_DATA: "sql_test_data.csv"
 
 jobs:
@@ -73,29 +73,8 @@ jobs:
         databricks workspace mkdirs "$WORKSPACE_USER_PATH/temp"
         databricks workspace import-dir temporals/temp "$WORKSPACE_USER_PATH/temp" --overwrite
 
-#    - name: Attempt to deploy temp notebook
-#      run: |
-#        databricks fs mkdir "/Users/robert.price@rpdw.co.uk/temp"
-#        databricks fs cp "temporals/temp/register_udfs.sql" "/Users/robert.price@rpdw.co.uk/temp/" --overwrite
-
     - name: Sync databricks repo folders
       run: databricks repos update $WORKSPACE_REPO_ID --branch main
-
-#    - name: Help
-#      run: databricks volumes --help
-
-#    - name: Where am I
-#      run: pwd
-
-#    - name: What is local
-#      run: |
-#        pwd
-#        ls -la
-#        ls -la temporals
-#        ls -la temporals/temp
-
-#    - name: What is remote
-#      run: databricks volumes list workspace funlib
 
     - name: Submit UDF Registration Inline
       if: ${{ !contains(github.event.head_commit.message, '[skip runsql]') && !contains(github.event.head_commit.message, '[skip regsql]') }}
@@ -134,23 +113,3 @@ jobs:
             }
           }]
         }"
-
-#    - name: Submit UDF Testing Inline
-#      if: ${{ !contains(github.event.head_commit.message, '[skip runsql]') && !contains(github.event.head_commit.message, '[skip testsql]') }}
-#      run: |
-#        databricks jobs submit --json "{
-#          \"run_name\": \"CI Notebook UDF Testing\",
-#          \"tasks\": [{
-#            \"task_key\": \"Launch_Test_Notebook\",
-#            \"notebook_task\": {
-#              \"notebook_path\": \"$WORKSPACE_USER_PATH/temp/test_udfs\",
-#              \"warehouse_id\": \"$WAREHOUSE_ID\",
-#              \"base_parameters\": {
-#                \"env\": \"ci\",
-#                \"catalog_name\": \"$CATALOG_NAME\",
-#                \"schema_name\": \"$SCHEMA_NAME\"
-#              }
-#            }
-#          }]
-#       }"
-
