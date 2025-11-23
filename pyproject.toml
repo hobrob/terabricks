@@ -1,0 +1,32 @@
+
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "terabricks-temporals"
+version = "1.0.0"
+authors = [
+  { name="Robert Price", email="robert.price@rpdw.co.uk" },
+]
+description = "Emulating Teradata's period functions and operators on Databricks"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["Teradata", "Databricks", "period", "temporal", "SCD", "UDFs"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Database Developers"
+]
+license = "MIT"
+license-files = ["LICENSE.txt"]
+
+[project.urls]
+Repository = "https://github.com/hobrob/terabricks/tree/main/temporals"
+
+[tool.setuptools]
+packages = ["temporals", "temporals.core"]
+
+[tool.setuptools.package-data]
+"temporals" = ["README.md"]
