@@ -1,6 +1,9 @@
 name: Terabricks CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
 
 env:
   DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
@@ -13,7 +16,7 @@ env:
   WORKSPACE_VOLUME_PATH: ${{ secrets.WORKSPACE_VOLUME_PATH }}
   CATALOG_NAME: ${{ secrets.CATALOG_NAME }}
   SCHEMA_NAME: ${{ secrets.SCHEMA_NAME }}
-  WHEEL_NAME: "terabricks_temporals-1.0.0-py3-none-any.whl"
+  WHEEL_NAME: "terabricks_temporals-1.1.0-py3-none-any.whl"
   TEST_DATA: "sql_test_data.csv"
 
 jobs:
