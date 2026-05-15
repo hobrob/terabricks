@@ -77,7 +77,7 @@ jobs:
         databricks workspace import-dir temporals/temp "$WORKSPACE_USER_PATH/temp" --overwrite
 
     - name: Sync databricks repo folders
-      run: databricks repos update $WORKSPACE_REPO_ID --branch main
+      run: databricks repos update $WORKSPACE_REPO_ID --branch "${{ github.head_ref }}"
       continue-on-error: true
 
     - name: Submit UDF Registration Inline
