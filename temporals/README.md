@@ -48,17 +48,17 @@ Replace the text between angled brackets <> with values that are applicable to y
 3. **Upload the wheel to Unity Catalog**<br />
    Choose or create a target volume to host the wheel package and upload via the Unity Catalog UI, or from a python notebook cell:-
    ```bash
-    dbutils.fs.cp("file:dist/terabricks_temporals-0.0.1-py3-none-any.whl", "dbfs:/Volumes/<catalog>/<schema>/<volume>/")
+    dbutils.fs.cp("file:dist/terabricks_temporals-1.1.0-py3-none-any.whl", "dbfs:/Volumes/<catalog>/<schema>/<volume>/")
    ```
    Or from the Databricks cli:-
    ```bash
-    databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/<catalog>/<schema>/<volume>/"
+    databricks fs cp "dist/terabricks_temporals-1.1.0-py3-none-any.whl" "dbfs:/Volumes/<catalog>/<schema>/<volume>/"
    ```
    
 4. **Upload the udf registration script**<br />
    Run sed to update the notebook with the volume path chosen in step 3 and the wheel name then it is ready to upload to a target workspace of your choosing.
    ```bash
-   sed -i "s|__VOLUME__|/Volumes/<catalog>/<schema>/<volume>|g;s|__WHEEL__|terabricks_temporals-0.0.1-py3-none-any.whl|g" temporals/core/register_udfs.sql
+   sed -i "s|__VOLUME__|/Volumes/<catalog>/<schema>/<volume>|g;s|__WHEEL__|terabricks_temporals-1.1.0-py3-none-any.whl|g" temporals/core/register_udfs.sql
    ```
    Upload to Databricks using the workspace UI, or from a python notebook cell
    ```bash
