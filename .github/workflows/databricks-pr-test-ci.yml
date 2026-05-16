@@ -1,9 +1,7 @@
 name: Terabricks CI
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 env:
   DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
