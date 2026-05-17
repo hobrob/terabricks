@@ -1,5 +1,17 @@
 
-from collections import namedtuple
+from typing import NamedTuple
 
-PeriodInfo = namedtuple("PeriodInfo", ["start_ts", "end_ts", "dttm_type", "precision"])
-InstantInfo = namedtuple("InstantInfo", ["instant_ts", "dttm_type", "precision"])
+
+class PeriodInfo(NamedTuple):
+    start_ts: object
+    end_ts: object
+    dttm_type: int
+    precision: int
+    tz_offset: str | None = None
+
+
+class InstantInfo(NamedTuple):
+    instant_ts: object
+    dttm_type: int
+    precision: int
+    tz_offset: str | None = None

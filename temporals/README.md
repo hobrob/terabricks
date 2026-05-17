@@ -48,17 +48,17 @@ Replace the text between angled brackets <> with values that are applicable to y
 3. **Upload the wheel to Unity Catalog**<br />
    Choose or create a target volume to host the wheel package and upload via the Unity Catalog UI, or from a python notebook cell:-
    ```bash
-    dbutils.fs.cp("file:dist/terabricks_temporals-0.0.1-py3-none-any.whl", "dbfs:/Volumes/<catalog>/<schema>/<volume>/")
+    dbutils.fs.cp("file:dist/terabricks_temporals-1.1.0-py3-none-any.whl", "dbfs:/Volumes/<catalog>/<schema>/<volume>/")
    ```
    Or from the Databricks cli:-
    ```bash
-    databricks fs cp "dist/terabricks_temporals-0.0.1-py3-none-any.whl" "dbfs:/Volumes/<catalog>/<schema>/<volume>/"
+    databricks fs cp "dist/terabricks_temporals-1.1.0-py3-none-any.whl" "dbfs:/Volumes/<catalog>/<schema>/<volume>/"
    ```
    
 4. **Upload the udf registration script**<br />
    Run sed to update the notebook with the volume path chosen in step 3 and the wheel name then it is ready to upload to a target workspace of your choosing.
    ```bash
-   sed -i "s|__VOLUME__|/Volumes/<catalog>/<schema>/<volume>|g;s|__WHEEL__|terabricks_temporals-0.0.1-py3-none-any.whl|g" temporals/core/register_udfs.sql
+   sed -i "s|__VOLUME__|/Volumes/<catalog>/<schema>/<volume>|g;s|__WHEEL__|terabricks_temporals-1.1.0-py3-none-any.whl|g" temporals/core/register_udfs.sql
    ```
    Upload to Databricks using the workspace UI, or from a python notebook cell
    ```bash
@@ -90,7 +90,7 @@ Replace the text between angled brackets <> with values that are applicable to y
 6. **Verify UDFs are registered**<br />
     Run a test SQL query in Databricks SQL Editor or from an SQL notebook cell.
     ```SQL
-    SELECT P_Intersect(array('2025-05-01', '2025-07-01'), array('2025-06-01', '2025-08-01'));
+    SELECT P_Intersect(Period('2025-05-01', '2025-07-01'), Period('2025-06-01', '2025-08-01'));
     ```
 ---
 
@@ -131,51 +131,66 @@ To deploy the UDFs via CI:
 
 <a id="001_003"></a>
 ### 1.3. Valid Period Formats
-   Define period types that can be operated on by the function set by constructing a two-element array with strings that conform to one of the following three date, time or timestamp formats.
+   Construct period values using the `Period(lower, upper)` constructor function. Both bounds must be ISO 8601-compliant strings of the same type and precision. The constructor validates the inputs once and returns a typed Period struct with an embedded UUID watermark — all subsequent UDF calls verify only the watermark rather than re-running full validation, giving significant performance gains when operating across millions of rows.
+
+   Valid bound formats:
    ```sql
-   '2025-06-01' -- date
-   '12:34:56.789' -- time with optional second precision up to 6 decimal places
-   '2025-06-01 12:34:56.789' -- timestamp with optional second precision up to 6 decimal places
+   '2025-06-01'                  -- date
+   '12:34:56.789'                -- time with optional fractional seconds (1–6 decimal places)
+   '2025-06-01 12:34:56.789'    -- timestamp with optional fractional seconds (1–6 decimal places)
    ```
-   Both elements of the array must take the same format, mixed types and precisions will cause the UDFs to throw an error. They must cast to a valid date and / or time and the second element must be at least one unit grain of time greater than the first. Additional elements of the array can be populated if so desired. 
+
+   Timezone offsets are supported for time and timestamp types using the `+HH:MM`, `-HH:MM`, or `Z` suffix:
    ```sql
-   array('2025-06-01', '2025-06-02 12:34:56') -- ❌ invalid, mixing different types
-   array('12:34:56.7', '12:34:56.789') -- ❌ invalid, mixing different precision
-   array('2025-06-01', '2025-06-32') -- ❌ invalid, impossible date
-   array('2025-06-01', '2025-06-01') -- ❌ invalid, upper bound is not greater than the lower bound
-   array('2025-06-01', '2025-06-08') -- ✅ valid 7 day period
-   array('2025-06-01', '2025-06-08', 'Alpaca appreciation week') -- ✅ also valid
+   '12:34:56+05:30'              -- time with UTC+5:30 offset
+   '2025-06-01 12:34:56-04:00'  -- timestamp with UTC-4 offset
+   '2025-06-01 08:00:00Z'       -- timestamp in UTC
+   ```
+
+   Both bounds must have the same type, the same fractional-second precision, and the same timezone offset (or both omit it). The upper bound must be strictly greater than the lower bound.
+   ```sql
+   Period('2025-06-01', '2025-06-02 12:34:56')  -- ❌ mixing types
+   Period('12:34:56.7', '12:34:56.789')          -- ❌ mismatched precision
+   Period('2025-06-01', '2025-06-32')            -- ❌ impossible date
+   Period('2025-06-01', '2025-06-01')            -- ❌ upper bound not greater than lower
+   Period('2025-06-01 08:00:00+01:00', '2025-06-30 08:00:00-04:00') -- ❌ mismatched timezone
+   Period('2025-06-01', '2025-06-08')            -- ✅ valid 7-day period
+   Period('08:00:00+05:30', '17:00:00+05:30')    -- ✅ valid time period with timezone
    ```
 
 ---
 
 <a id="001_004"></a>
 ### 1.4. Examples
-   Validate and inspect the bounds of period types, get values adjacent to an instant. Check for high value end dates and get the duration in a variety of measures.
+   Use the `Period()` constructor to create period values, then pass them to any of the UDFs.
    ```sql
 SELECT 
-        array('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
+        Period('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
         IsPeriod(p), Begin(p), End(p), Prior(t);
 
 SELECT 
-        array('2025-01-01', '2025-12-31') AS p, 
+        Period('2025-01-01', '2025-12-31') AS p, 
         IsUntilChanged(p), IntervalD(p), IntervalH(p);
    ```
    Check if an instant falls within a period or meets its bounds. Check if two periods overlap, meet, or if one precedes the other.
    ```sql
 SELECT 
-        array('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
-        Contains(p, t), Meets(p, t);
+        Period('2024-01-01', '2024-12-31') AS p, '2024-06-01' as t, 
+        Contains(p, t), MeetsInstant(p, t);
 
 SELECT 
-        array('2024-01-01', '2024-07-01') AS p1, array('2024-07-01', '2024-12-31') as p2,
+        Period('2024-01-01', '2024-07-01') AS p1, Period('2024-07-01', '2024-12-31') as p2,
         Overlaps(p1, p2), MeetsPeriod(p1, p2), Precedes(p1, p2);
    ```
    Return a period that represents the overlap between two periods, or the gap between two periods.
    ```sql
 SELECT 
-        array('2024-01-01', '2024-09-01') AS p1, array('2024-07-01', '2024-12-31') as p2, array('2025-03-01', '2025-12-31') as p3,
+        Period('2024-01-01', '2024-09-01') AS p1, Period('2024-07-01', '2024-12-31') as p2, Period('2025-03-01', '2025-12-31') as p3,
         P_Intersect(p1, p2), P_Intermediate(p2, p3);
+   ```
+   Use timezone-offset timestamps with `Period()` — all bounds must share the same offset.
+   ```sql
+SELECT Contains(Period('2025-06-01 08:00:00+05:30', '2025-06-30 08:00:00+05:30'), '2025-06-15 12:00:00+05:30');
    ```
 ---
 
@@ -185,11 +200,11 @@ SELECT
 - Period types are a composite type consisting of two homogenously-typed date, time, or timestamp values.
 - Hold an inclusive lower bound and exclusive upper bound.
 - Sentinel “end” value for dates is 9999-12-31, for times 23:59:59.999999, and for timestamps it is the composite of these two values.
-- Created using the `PERIOD()` constructor function.
+- Created using the `Period(lower, upper)` constructor function, which validates once and returns a struct with an embedded UUID watermark.
 
 ```sql
 -- create a date, time, and timestamp-ranged period
-- SELECT PERIOD('2025-01-01', '2026-01-01'), PERIOD('13:50:00.00', '14:10:00.00'), PERIOD('2025-01-01 13:50:00.00', '2026-01-01 14:10:00.00');
+SELECT Period('2025-01-01', '2026-01-01'), Period('13:50:00.00', '14:10:00.00'), Period('2025-01-01 13:50:00.00', '2026-01-01 14:10:00.00');
 ```
 The set of functions and operators that accompany the period data type can be broadly categorised into four areas:
 - Informational - return information about the type such as the beginning or end bound, or the duration.
@@ -206,7 +221,7 @@ The set of functions and operators that accompany the period data type can be br
 
 The set of operators and functions available on Teradata are able to accept any of the three distinct data types that can be found within a period - date, time, or timestamp. Since UDFs are strongly typed, i.e. they must explicitly declare a single data type for each argument, it is necessary to instead use a data type that can accommodate all three types and therefore strings validated as containing ISO 8601 compliant formats are expected and returned wherever they would be found on Teradata.
 
-To emulate the composite nature of the period type Terabricks expects the string dates and / or times to be contained within the first two elements of an array. Since the array type can be flexible and dynamic, Terabricks does not place any restriction on values beyond the second element so the developer is free to use higher order elements for metadata or anything they deem useful.
+To emulate the composite nature of the period type, Terabricks uses a `Period(lower, upper)` constructor UDF that validates the two bound strings once and returns a typed struct `STRUCT<lower: STRING, upper: STRING, period_id: STRING>`. The `period_id` field carries a fixed UUID watermark so that all other UDFs can confirm the value was produced by the constructor with a single equality check, eliminating per-row regex validation overhead.
 
 #### 1 to 1 Function Mapping
 
@@ -218,7 +233,9 @@ Time and timestamp types in Teradata have strongly typed precision whereas Datab
 
 #### Timezone Awareness
 
-The Terabricks set of UDFs in the MVP version are not currently timezone aware. Any timezone related calculations should be handled outside of the UDFs, or wait until the next version of Terabricks.
+Time and timestamp bound values may include a UTC offset suffix in `+HH:MM`, `-HH:MM`, or `Z` (UTC) format. Both bounds of a period must carry the same offset (or both omit it entirely), and any instant passed to a period UDF must match the period's offset. The `Period()` constructor enforces these constraints at construction time; subsequent UDF calls rely on the UUID watermark and therefore incur no extra timezone-checking overhead.
+
+Date bounds never carry timezone information.
 
 ---
 
@@ -227,19 +244,20 @@ The Terabricks set of UDFs in the MVP version are not currently timezone aware. 
 
 The full set of informational, sequencing, and set operation functions and operators have all been replicated in some form or another, but some additional functions are also provided to extend the functionality available in Teradata.<br />
 
-| Function                  | Description                                                                 |
-|---------------------------|-----------------------------------------------------------------------------|
-| `IsPeriod(p)`             | Tests whether array `p` conforms to the format required by the UDFs.        |
-| `Consumes(p1, p2)`        | Checks if `p1` is at least equal to or fully engulfs `p2`.                  |
-| `OverlapsLeft(p1, p2)`    | Tests if `p1` overlaps `p2` with a portion of `p1` occurring before `p2`.   |
-| `OverlapsRight(p1, p2)`   | Tests if `p1` overlaps `p2` with a portion of `p1` occurring after `p2`.    |
-| `P_Intermediate(p1, p2)`  | Returns the gap period between `p1` and `p2` if they don’t overlap or touch.|
+| Function                  | Description                                                                                         |
+|---------------------------|-----------------------------------------------------------------------------------------------------|
+| `Period(lower, upper)`    | Constructor that validates bounds once and returns a Period struct with a UUID watermark.            |
+| `IsPeriod(p)`             | Returns true if `p` is a valid Period struct created by the `Period()` constructor.                 |
+| `Consumes(p1, p2)`        | Checks if `p1` is at least equal to or fully engulfs `p2`.                                         |
+| `OverlapsLeft(p1, p2)`    | Tests if `p1` overlaps `p2` with a portion of `p1` occurring before `p2`.                          |
+| `OverlapsRight(p1, p2)`   | Tests if `p1` overlaps `p2` with a portion of `p1` occurring after `p2`.                           |
+| `P_Intermediate(p1, p2)`  | Returns the gap period between `p1` and `p2` if they don’t overlap or touch.                  |
 ---
 
 <a id="005"></a>
 ## 🧮 5. Table of Functions and Operators
 
-In the following table the placeholders p, p1, and p2 represent periods and t represents point-in-time instants. For the Terabricks equivalent UDFs, where a return type of DATE/TIME/TIMESTAMP is given this actually equates to an ISO 8601 compliant string, and PERIOD equates to a two-element array of ISO 8601 compliant strings. 
+In the following table the placeholders p, p1, and p2 represent periods and t represents point-in-time instants. For the Terabricks equivalent UDFs, where a return type of DATE/TIME/TIMESTAMP is given this actually equates to an ISO 8601 compliant string, and PERIOD equates to a Period struct returned by the `Period()` constructor. 
 
 | Category       | Teradata Usage                 | Terabricks Usage                              | Return Type               | Notes                                                                                                                         |
 |----------------|--------------------------------|-----------------------------------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
@@ -289,9 +307,9 @@ In the following table the placeholders p, p1, and p2 represent periods and t re
 This is a wishlist of things that will be added in future releases on a best endeavours basis.
 
 - [ ] Permissive Precision Handling - Functions that enforce precision parity will be relaxed to allow times and timestamps of varying precision to be compared.
-- [ ] Timezone awareness - Period arrays will allow UTC offsets suffixed to time and timestamp values.
+- [x] Timezone awareness - Time and timestamp values may include UTC offsets (`+HH:MM`, `-HH:MM`, `Z`). Both bounds of a period and any instant must share the same offset.
 - [ ] Table functions - A full interpretation of the set of function prefixed with TD_ is desirable, though may be difficult to implement in Unity Catalog due to a limitation whereby only scalar UDFs are allowed.  
-- [ ] Optimize period array validation - Introduce a constructor function that embeds a validation watermark or checksum into period arrays. This will reduce redundant format checks across UDF calls and improve runtime efficiency while preserving data integrity.
+- [x] Optimize period validation - The `Period(lower, upper)` constructor validates once and embeds a UUID watermark into a typed struct. All other UDFs perform a single equality check against the watermark rather than re-running regex validation, eliminating per-row overhead at scale.
 
 Contributions are welcome, please see [CONTRIBUTIONS.md]() for more info.
 
